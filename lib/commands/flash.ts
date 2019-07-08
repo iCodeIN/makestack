@@ -42,7 +42,7 @@ export class FlashCommand extends Command {
         }
 
         logger.progress("Flashing...");
-        board.flashFirmware(opts.device, board.getFirmwarePath());
+        await board.flashFirmware(opts.device, board.getFirmwarePath());
         logger.success("Done!");
     }
 }
