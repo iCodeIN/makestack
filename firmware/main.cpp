@@ -34,7 +34,12 @@ void supervisor_main() {
     tcpip_adapter_init();
     esp_event_loop_init(system_event_callback, NULL);
 
-    xTaskCreate((TaskFunction_t) &serial_adapter_task, "serial_adapter_task", 8192 * 4, NULL, 10, NULL);
-    xTaskCreate((TaskFunction_t) &wifi_adapter_task, "wifi_adapter_task", 8192 * 2, NULL, 10, NULL);
+    if (!strcmp(__cred.adapter, "serial")) {
+        xTaskCreate((TaskFunction_t) &serial_adapter_task, "serial_adapter_task", 8192 * 4, NULL, 10, NULL);
+    }
+    if (!strcmp(__cred.adapter, "wifi")) {
+        xTaskCreate((TaskFunction_t) &wifi_adapter_task, "wifi_adapter_task", 8192 * 2, NULL, 10, NULL);
+    }
+
     xTaskCreate((TaskFunction_t) &app_task, "app_task", 8192, NULL, 10, NULL);
 }

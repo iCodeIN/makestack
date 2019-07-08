@@ -9,11 +9,13 @@ COMMANDS := menuconfig clean flash monitor print_flash_cmd erase_flash
 $(COMMANDS):
 	$(MAKE) -f $(BOARD_DIR)/esp_idf.mk $@
 
+ADAPTER ?= serial
 build:
 	$(MAKE) -f $(BOARD_DIR)/esp_idf.mk all_binaries
 	echo Embedding the credential...
 	WIFI_PASSWORD="$(WIFI_PASSWORD)" ./embed-cred.py \
 		--version $(shell date "+%s") \
+		--adapter "$(ADAPTER)" \
 		--wifi-ssid "$(WIFI_SSID)" \
 		--server-url "$(SERVER_URL)" \
 		$(BUILD_DIR)/firmware.elf

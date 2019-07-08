@@ -7,6 +7,7 @@ import os
 """
 struct cred {
     uint64_t version;
+    char adapter[8];
     char wifi_ssid[64];
     char wifi_password[64];
     char server_url[256];
@@ -17,9 +18,9 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("file")
     parser.add_argument("--endian", default="little")
+    parser.add_argument("--adapter")
     parser.add_argument("--version")
-    parser.add_argument("--wifi-ssid",
-        help="The Wi-Fi SSID. Specify an empty string to disable the Wi-Fi adapter.")
+    parser.add_argument("--wifi-ssid")
     parser.add_argument("--server-url")
     args = parser.parse_args()
 
@@ -28,7 +29,12 @@ def main():
     if len(args.wifi_ssid) > 0 and wifi_password is None:
         sys.exit("WIFI_PASSWORD environment variable is not set")
 
+    if args.adapter not in ["serial", "wifi"]:
+        sys.exit("invalid adapter name")
+
     # Subtract the max len by 1 to guarantee that strings are null-terminated.
+    if len(args.adapter) > 8 - 1:
+        sys.exit("too long adapter name")
     if len(args.wifi_ssid) > 64 - 1:
         sys.exit("too long wifi ssid")
     if len(wifi_password) > 64 - 1:
@@ -37,8 +43,9 @@ def main():
         sys.exit("too long server URL")
 
     endian = "<" if args.endian == "little" else ">"
-    cred = struct.pack(endian + "Q64s64s256s",
+    cred = struct.pack(endian + "Q8s64s64s256s",
         int(args.version),
+        bytes(args.adapter, "utf-8"),
         bytes(args.wifi_ssid, "utf-8"),
         bytes(wifi_password, "utf-8"),
         bytes(args.server_url.rstrip("/"), "utf-8"))
