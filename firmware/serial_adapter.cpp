@@ -10,27 +10,26 @@
 #define UART_RX_PIN  GPIO_NUM_3
 
 static size_t escape_payload(uint8_t *buf, size_t buf_len, size_t payload_len) {
-    size_t new_len = 0;
+    size_t i = 0;
     int shifts = 0;
-    for (size_t i = 0; i < payload_len; i++) {
-        uint8_t byte = buf[i + shifts];
+    while (i < payload_len + shifts) {
+        uint8_t byte = buf[i];
         if (byte == 0x0a || byte == 0xee) {
             if (buf_len < payload_len + shifts + 1) {
                 WARN("too short payload buf");
                 return 0;
             }
 
-            memmove(buf + i + shifts + 2, buf + i + shifts + 1,
-                payload_len - (i + shifts + 1));
-            buf[new_len++] = 0xee;
-            buf[new_len++] = (byte == 0x0a) ? 0xe0 : 0xe1;
+            memmove(buf + i + 2, buf + i + 1, payload_len - (i - shifts));
+            buf[i++] = 0xee;
+            buf[i++] = (byte == 0x0a) ? 0xe0 : 0xe1;
             shifts++;
         } else {
-            buf[new_len++] = buf[i + shifts];
+            i++;
         }
     }
 
-    return new_len;
+    return i;
 }
 
 static size_t build_packet(uint8_t *buf, size_t buf_len) {
