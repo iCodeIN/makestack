@@ -272,6 +272,19 @@ void process_payload(uint8_t *payload, size_t payload_len) {
     read_retries = 0;
 }
 
+static size_t build_field(uint8_t *buf, size_t buf_len, uint8_t type, void *data, size_t data_len) {
+    // TODO: encodeLEB128
+    size_t header_len = 2;
+    if (data_len + header_len > buf_len) {
+        return 0;
+    }
+
+    *buf++ = type;
+    *buf++ = data_len;
+    memcpy(buf, data, data_len);
+    return header_len + data_len;
+}
+
 size_t build_payload(uint8_t *buf, size_t buf_len) {
     size_t remaining = buf_len;
     uint8_t *p = buf;
@@ -286,37 +299,33 @@ size_t build_payload(uint8_t *buf, size_t buf_len) {
     p += sizeof(struct payload_header);
     uint8_t *payload_data = p;
 
-    // TODO: encodeLEB128
-
     // firmware_request
     if (current_state == State::UPDATING) {
-        if (remaining < 2 + sizeof(struct firmware_request)) {
+        struct firmware_request data;
+        data.offset = downloaded_size;
+        data.version = next_version;
+
+        size_t copied_len;
+        if (!(copied_len = build_field(p, remaining, 0xaa, &data, sizeof(data)))) {
             WARN("too short payload buf");
             return 0;
         }
 
-        *p++ = 0xaa; // firmware request
-        *p++ = sizeof(struct firmware_request);
-        struct firmware_request *data = (struct firmware_request *) p;
-        data->offset = downloaded_size;
-        data->version = next_version;
-        p += sizeof(struct firmware_request);
-        remaining -= 2 + sizeof(struct firmware_request);
+        p += copied_len;
+        remaining -= copied_len;
     }
 
     // pong
     if (reply_pong) {
-        if (remaining < 2 + PONG_DATA_LEN) {
+        size_t copied_len;
+        if (!(copied_len = build_field(p, remaining, 0x05, (void *) PONG_DATA, PONG_DATA_LEN))) {
             WARN("too short payload buf");
             return 0;
         }
 
-        *p++ = 0x05; // pong
-        *p++ = PONG_DATA_LEN;
-        memcpy(p, PONG_DATA, PONG_DATA_LEN);
-        p += PONG_DATA_LEN;
-        reply_pong = true;
-        remaining -= 2 + PONG_DATA_LEN;
+        p += copied_len;
+        remaining -= copied_len;
+        reply_pong = false;
     }
 
     size_t payload_len = (uintptr_t) p - (uintptr_t) buf;
