@@ -41,7 +41,7 @@ def main():
         int(args.version),
         bytes(args.wifi_ssid, "utf-8"),
         bytes(wifi_password, "utf-8"),
-        bytes(args.server_url, "utf-8"))
+        bytes(args.server_url.rstrip("/"), "utf-8"))
 
     with open(args.file, "rb") as f:
         image = f.read()
