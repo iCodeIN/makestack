@@ -19,18 +19,6 @@ void app_task() {
     vTaskDelete(NULL);
  }
 
-void blink_task() {
-    const gpio_num_t BLINK_GPIO = GPIO_NUM_5;
-    gpio_pad_select_gpio(BLINK_GPIO);
-    gpio_set_direction(BLINK_GPIO, GPIO_MODE_OUTPUT);
-    while(1) {
-        gpio_set_level(BLINK_GPIO, 0);
-        vTaskDelay(1000 / portTICK_PERIOD_MS);
-        gpio_set_level(BLINK_GPIO, 1);
-        vTaskDelay(1000 / portTICK_PERIOD_MS);
-    }
-}
-
 esp_err_t system_event_callback(void *ctx, system_event_t *event) {
     if (event->event_id == SYSTEM_EVENT_STA_GOT_IP) {
         got_ip_event_handler();
@@ -46,7 +34,6 @@ void supervisor_main() {
     tcpip_adapter_init();
     esp_event_loop_init(system_event_callback, NULL);
 
-    xTaskCreate((TaskFunction_t) &blink_task, "blink_task", 1024, NULL, 10, NULL);
     xTaskCreate((TaskFunction_t) &serial_adapter_task, "serial_adapter_task", 8192 * 4, NULL, 10, NULL);
     xTaskCreate((TaskFunction_t) &wifi_adapter_task, "wifi_adapter_task", 8192 * 2, NULL, 10, NULL);
     xTaskCreate((TaskFunction_t) &app_task, "app_task", 8192, NULL, 10, NULL);
