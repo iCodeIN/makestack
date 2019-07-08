@@ -57,6 +57,14 @@ export class DevCommand extends Command {
 
     public async run(args: Args, opts: Opts) {
         this.board = opts.board;
+
+        // First, build the firmware. We need the firmware file in order to send
+        // the latest version info in a heartbeat.
+        if (!(await this.build(opts.appDir))) {
+            logger.error("fix build errors and run the command again");
+            process.exit(1);
+        }
+
         switch (opts.adapter) {
             case "serial":
                 const serialAdapter = new SerialAdapter();
@@ -97,14 +105,6 @@ export class DevCommand extends Command {
                 break;
             default:
                 throw new Error(`Unknown adapter type: \`${opts.adapter}'`);
-        }
-
-
-        // First, build the firmware. We need the firmware file in order to send
-        // the latest version info in a heartbeat.
-        if (!(await this.build(opts.appDir))) {
-            logger.error("fix build errors and run the command again");
-            process.exit(1);
         }
 
         // Watch for the app source files.
