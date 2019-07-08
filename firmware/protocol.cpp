@@ -132,7 +132,7 @@ static void receive_ota_data(uint8_t *data, size_t len) {
     }
 }
 
-static void process_firmwware_data(uint8_t *data, size_t len) {
+static void process_firmware_data(uint8_t *data, size_t len) {
     if (len < sizeof(struct firmware_data_header)) {
         DEBUG("[MakeStack] too short data len");
         return;
@@ -226,7 +226,7 @@ static void process_field(uint8_t type, uint8_t *data, size_t data_len) {
         process_version_info(data, data_len);
         break;
     case 0x02: // firmware data
-        process_firmwware_data(data, data_len);
+        process_firmware_data(data, data_len);
         break;
     case 0x03: // corrupt rate check
         process_corrupt_rate_check(data, data_len);
