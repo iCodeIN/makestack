@@ -119,6 +119,7 @@ void process_version_info(uint8_t *data, size_t len) {
 
 static void abort_update() {
     current_state = State::NORMAL;
+    downloaded_size = 0;
 }
 
 static void receive_ota_data(uint8_t *data, size_t len) {
