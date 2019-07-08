@@ -62,3 +62,28 @@ export const validateBoardType: Validator = (boardType: string): any => {
 
     return require(`../boards/${boardType}`);
 };
+
+
+const deviceFilePatterns = [
+    /tty\.usbserial-.+/,
+    /ttyUSB[0-9]/,
+];
+export const validateDeviceFilePath: Validator = (deviceFile: string): any => {
+    if (deviceFile.length > 0) {
+        return deviceFile;
+    }
+
+    const candidates = fs.readdirSync("/dev").filter((file) => {
+        return deviceFilePatterns.some((pat) => pat.exec(file) !== null);
+    });
+
+    if (candidates.length === 0) {
+        throw new Error("Failed to locate the device file.");
+    }
+
+    if (candidates.length > 1) {
+        throw new Error("Found multiple device files. Please specify the one in the command-line option.");
+    }
+
+    return path.join("/dev", candidates[0]);
+}

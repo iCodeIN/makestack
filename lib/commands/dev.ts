@@ -7,6 +7,7 @@ import {
     Opts,
     validateAppDir,
     validateBoardType,
+    validateDeviceFilePath,
 } from "./command";
 import { Board } from "../boards";
 import { logger } from "../logger";
@@ -19,11 +20,11 @@ export class DevCommand extends Command {
     public static desc = "";
     public static args = [];
     public static opts = [
-        // TODO: Guess the file path.
         {
             name: "--device <path>",
             desc: "The device file path.",
-            required: true,
+            default: "",
+            validator: validateDeviceFilePath,
         },
         {
             name: "--baudrate <rate>",
