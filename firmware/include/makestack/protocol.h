@@ -22,6 +22,13 @@ struct firmware_request {
     uint32_t offset;
 } __attribute__((packed));
 
+struct device_status {
+    uint8_t state;
+    uint8_t battery_level;
+    uint16_t reserved;
+    uint32_t ram_free;
+} __attribute__((packed));
+
 void process_payload(uint8_t *payload, size_t payload_len);
 size_t build_payload(uint8_t *buf, size_t buf_len);
 void adapter_read_error();

@@ -14,6 +14,7 @@ import { logger } from "../logger";
 import { parsePayload, constructPayload } from "../protocol";
 import { extractCredentials, buildApp } from "../firmware";
 import { SerialAdapter, WiFiAdapter } from "../adapters";
+import { bytesToReadableString } from "../helpers";
 
 export class DevCommand extends Command {
     public static command = "dev";
@@ -148,6 +149,11 @@ export class DevCommand extends Command {
 
     private processPayload(rawPayload: Buffer):  Buffer | null {
         const payload = parsePayload(rawPayload);
+        if (payload.deviceStatus) {
+            const { ramFree } = payload.deviceStatus;
+            console.log(`ram free: ${ramFree} bytes (${bytesToReadableString(ramFree)})`);
+        }
+
         if (payload.log) {
             for (const line of payload.log.split("\n")) {
                 console.log("device log:", line);

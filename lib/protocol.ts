@@ -1,6 +1,11 @@
 import { logger } from "./logger";
 
 export interface Payload {
+    deviceStatus?: {
+        state: string,
+        batteryLevel: number,
+        ramFree: number,
+    },
     version?: number,  /* FIXME: use bigint */
     firmwareRequest?: {
         version: number, /* FIXME: use bigint */
@@ -118,6 +123,7 @@ export function parsePayload(buf: Buffer): Payload {
     let firmwareRequest;
     let pong;
     let log;
+    let deviceStatus;
     let offset = 4;
     while (offset + 2 < buf.length) {
         const type = buf[offset];
@@ -131,6 +137,13 @@ export function parsePayload(buf: Buffer): Payload {
             break;
         case 0x06:
             log = data.toString("ascii");
+            break;
+        case 0x07:
+            deviceStatus = {
+                state: "", // TODO:
+                batteryLevel: data.readUInt8(1),
+                ramFree: data.readUInt32LE(4),
+            };
             break;
         case 0xaa:
             if (data.length != 12) {
@@ -148,5 +161,5 @@ export function parsePayload(buf: Buffer): Payload {
         offset += 1 + lengthLength + length;
     }
 
-    return { pong, firmwareRequest, log };
+    return { pong, firmwareRequest, log, deviceStatus };
 }

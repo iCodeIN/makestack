@@ -302,6 +302,22 @@ static size_t build_field(uint8_t *buf, size_t buf_len, uint8_t type, void *data
     return header_len + data_len;
 }
 
+size_t build_device_status_field(uint8_t *&p, size_t& remaining) {
+    struct device_status data;
+    data.state = 0; // TODO:
+    data.battery_level = 0; // TODO:
+    data.ram_free = esp_get_free_heap_size();
+
+    size_t copied_len;
+    if (!(copied_len = build_field(p, remaining, 0x07, (void *) &data, sizeof(data)))) {
+        return 0;
+    }
+
+    p += copied_len;
+    remaining -= copied_len;
+    return copied_len;
+}
+
 size_t build_log_field(uint8_t *&p, size_t& remaining) {
     size_t log_len;
     char *log = read_logger_buffer(&log_len);
@@ -316,7 +332,6 @@ size_t build_log_field(uint8_t *&p, size_t& remaining) {
     return copied_len;
 }
 
-
 size_t build_payload(uint8_t *buf, size_t buf_len) {
     size_t remaining = buf_len;
     uint8_t *p = buf;
@@ -330,6 +345,11 @@ size_t build_payload(uint8_t *buf, size_t buf_len) {
     struct payload_header *payload_header = (struct payload_header *) p;
     p += sizeof(struct payload_header);
     uint8_t *payload_data = p;
+
+    if (!build_device_status_field(p, remaining)) {
+        WARN("too short payload buf");
+        return 0;
+    }
 
     if (!build_log_field(p, remaining)) {
         WARN("too short payload buf");
