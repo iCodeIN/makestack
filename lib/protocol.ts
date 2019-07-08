@@ -19,7 +19,8 @@ export interface Payload {
     },
     pong?: {
         data: Buffer,
-    }
+    },
+    log?: string,
 }
 
 function encodeLEB128(value: number): Buffer {
@@ -116,6 +117,7 @@ export function parsePayload(buf: Buffer): Payload {
 
     let firmwareRequest;
     let pong;
+    let log;
     let offset = 4;
     while (offset + 2 < buf.length) {
         const type = buf[offset];
@@ -126,6 +128,9 @@ export function parsePayload(buf: Buffer): Payload {
         switch (type) {
         case 0x05:
             pong = { data };
+            break;
+        case 0x06:
+            log = data.toString("ascii");
             break;
         case 0xaa:
             if (data.length != 12) {
@@ -143,5 +148,5 @@ export function parsePayload(buf: Buffer): Payload {
         offset += 1 + lengthLength + length;
     }
 
-    return { pong, firmwareRequest };
+    return { pong, firmwareRequest, log };
 }

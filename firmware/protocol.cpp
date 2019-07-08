@@ -1,5 +1,7 @@
 #include <makestack/types.h>
+#include <makestack/logger.h>
 #include <makestack/cred.h>
+#include <makestack/logger.h>
 #include <makestack/protocol.h>
 
 #define MINIZ_NO_STDIO
@@ -34,6 +36,25 @@ static uint16_t compute_checksum(uint8_t *buf, size_t len) {
     return checksum;
 }
 
+
+static int encode_leb128(uint8_t *buf, size_t buf_len, uint32_t value) {
+    int i = 0;
+    do {
+        if (i >= buf_len) {
+            WARN("too short buf");
+            return 0;
+        }
+
+        DEBUG("value=%u", value);
+        uint8_t msb = (value >= 0x80) ? 0x80 : 0;
+        buf[i] = msb | (value & 0x7f);
+        i++;
+        value >>= 7;
+    } while (value > 0);
+
+    return i;
+}
+
 static int decode_leb128(uint8_t *buf, size_t buf_len, uint64_t *value) {
     *value = 0;
     int shift = 0;
@@ -47,13 +68,6 @@ static int decode_leb128(uint8_t *buf, size_t buf_len, uint64_t *value) {
 
     // Invalid format.
     return -1;
-}
-
-static void hexdump(const char *title, uint8_t *buf, size_t len) {
-    TRACE_NONL("%s=[", title);
-    for (int i = 0; i < len; i++)
-        TRACE_NONL("%02x%s", buf[i], (i + 1 == len) ? "" : ", ");
-    TRACE_NONL("]\n");
 }
 
 static struct payload_header *verify_magic(uint8_t *payload, size_t payload_len) {
@@ -215,7 +229,7 @@ static void process_corrupt_rate_check(uint8_t *data, size_t data_len) {
 
 
 static void process_ping(uint8_t *data, size_t data_len) {
-    hexdump("received ping", data, data_len);
+    DEBUG("received ping (len=%d)", data_len);
     reply_pong = true;
 }
 
@@ -273,17 +287,35 @@ void process_payload(uint8_t *payload, size_t payload_len) {
 }
 
 static size_t build_field(uint8_t *buf, size_t buf_len, uint8_t type, void *data, size_t data_len) {
-    // TODO: encodeLEB128
-    size_t header_len = 2;
+    uint8_t leb128_len[4];
+    size_t leb128_len_len = encode_leb128((uint8_t *) &leb128_len, sizeof(leb128_len), data_len);
+
+    size_t header_len = 1 + leb128_len_len;
     if (data_len + header_len > buf_len) {
         return 0;
     }
 
     *buf++ = type;
-    *buf++ = data_len;
+    memcpy(buf, &leb128_len, leb128_len_len);
+    buf += leb128_len_len;
     memcpy(buf, data, data_len);
     return header_len + data_len;
 }
+
+size_t build_log_field(uint8_t *&p, size_t& remaining) {
+    size_t log_len;
+    char *log = read_logger_buffer(&log_len);
+
+    size_t copied_len;
+    if (!(copied_len = build_field(p, remaining, 0x06, (void *) log, log_len))) {
+        return 0;
+    }
+
+    p += copied_len;
+    remaining -= copied_len;
+    return copied_len;
+}
+
 
 size_t build_payload(uint8_t *buf, size_t buf_len) {
     size_t remaining = buf_len;
@@ -298,6 +330,11 @@ size_t build_payload(uint8_t *buf, size_t buf_len) {
     struct payload_header *payload_header = (struct payload_header *) p;
     p += sizeof(struct payload_header);
     uint8_t *payload_data = p;
+
+    if (!build_log_field(p, remaining)) {
+        WARN("too short payload buf");
+        return 0;
+    }
 
     // firmware_request
     if (current_state == State::UPDATING) {

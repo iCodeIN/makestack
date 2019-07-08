@@ -148,6 +148,12 @@ export class DevCommand extends Command {
 
     private processPayload(rawPayload: Buffer):  Buffer | null {
         const payload = parsePayload(rawPayload);
+        if (payload.log) {
+            for (const line of payload.log.split("\n")) {
+                console.log("device log:", line);
+            }
+        }
+
         if (payload.pong) {
             this.verifiedPong = true;
         }

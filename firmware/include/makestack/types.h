@@ -1,12 +1,6 @@
 #ifndef __MAKESTACK_TYPES_H__
 #define __MAKESTACK_TYPES_H__
 
-#define TRACE(fmt, ...) printf("TRACE: " fmt "\n", ## __VA_ARGS__)
-#define TRACE_NONL(fmt, ...) printf(fmt, ## __VA_ARGS__)
-#define DEBUG(fmt, ...) printf("DEBUG: " fmt "\n", ## __VA_ARGS__)
-#define WARN(fmt, ...) printf("WARN: " fmt "\n", ## __VA_ARGS__)
-#define INFO(fmt, ...) printf(fmt "\n", ## __VA_ARGS__)
-
 // TODO: Eeduce #include
 #include <driver/gpio.h>
 #include <driver/uart.h>
@@ -20,8 +14,19 @@
 #include <nvs_flash.h>
 #include <sdkconfig.h>
 #include <stdio.h>
+#include <stdarg.h>
 #include <stdio.h>
 #include <string.h>
 #include <stdbool.h>
+
+template<typename T>
+static inline T min(T a, T b) {
+    return (a < b) ? a : b;
+}
+
+template<typename T>
+static inline T max(T a, T b) {
+    return (a > b) ? a : b;
+}
 
 #endif

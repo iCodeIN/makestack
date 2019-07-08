@@ -1,4 +1,5 @@
 #include <makestack/types.h>
+#include <makestack/logger.h>
 #include <makestack/protocol.h>
 #include <makestack/serial_adapter.h>
 

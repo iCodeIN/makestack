@@ -1,5 +1,6 @@
 #include <makestack/types.h>
 #include <makestack/cred.h>
+#include <makestack/logger.h>
 #include <makestack/serial_adapter.h>
 #include <makestack/wifi_adapter.h>
 
@@ -28,7 +29,10 @@ esp_err_t system_event_callback(void *ctx, system_event_t *event) {
 }
 
 void supervisor_main() {
-    INFO("\n[Makestack] Hello!");
+    init_logger();
+    printf("\n");
+
+    INFO("[Makestack] Hello!");
     INFO("[Makestack] version=%llu", __cred.version);
     nvs_flash_init();
     tcpip_adapter_init();

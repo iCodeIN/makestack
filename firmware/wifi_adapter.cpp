@@ -3,6 +3,7 @@
 #include <esp_wifi.h>
 #include <esp_ota_ops.h>
 #include <makestack/types.h>
+#include <makestack/logger.h>
 #include <makestack/cred.h>
 #include <makestack/cert.h>
 #include <makestack/protocol.h>
