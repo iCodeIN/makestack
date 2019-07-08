@@ -59,6 +59,10 @@ static size_t build_packet(uint8_t *buf, size_t buf_len) {
 
 static uint8_t *read_packet(uint8_t *buf, size_t buf_len, size_t *payload_len) {
     int read_len = uart_read_bytes(UART_PORT, buf, buf_len, 100 / portTICK_RATE_MS);
+    if (read_len < 0) {
+        // TODO: Sleep for a while or use interrupt instead of polling.
+        return NULL;
+    }
 
     // Look for the packet delimiter (0x0a).
     uint8_t *start, *end;
