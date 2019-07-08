@@ -37,3 +37,15 @@ export function exec(argv: string[], options: SpawnSyncOptions = {}) {
         throw new Error(`${exe} exited with ${r.status}`);
     }
 }
+
+export function bytesToReadableString(bytes: number): string {
+    let base = bytes;
+    let i = 0;
+    const units = [" bytes", "KB", "MB", "GB"];
+    while (base >= 1024 && i < units.length) {
+        base /= 1024;
+        i++;
+    }
+
+    return base.toFixed(2) + units[i];
+}
