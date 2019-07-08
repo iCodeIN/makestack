@@ -125,6 +125,11 @@ void connect_wifi() {
     strcpy((char *)config.sta.ssid, __cred.wifi_ssid);
     strcpy((char *)config.sta.password, __cred.wifi_password);
 
+    if (strlen(__cred.wifi_ssid) == 0) {
+        INFO("Wi-Fi SSID is empty, disabling the Wi-Fi adapter");
+        vTaskDelete(NULL);
+    }
+
     esp_wifi_init(&init_config);
     esp_wifi_set_storage(WIFI_STORAGE_RAM);
     esp_wifi_set_mode(WIFI_MODE_STA);
