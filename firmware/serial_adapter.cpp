@@ -1,6 +1,5 @@
 #include <makestack/types.h>
 #include <makestack/protocol.h>
-#include <makestack/adapter.h>
 #include <makestack/serial_adapter.h>
 
 #define BUF_LEN (1024 * 9)
