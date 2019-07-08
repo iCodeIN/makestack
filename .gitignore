@@ -1,0 +1,6 @@
+*.log
+/node_modules
+/dist
+/firmware/deps
+/firmware/build
+/firmware/boards/esp32/sdkconfig.old

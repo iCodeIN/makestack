@@ -1,0 +1,172 @@
+import * as fs from "fs";
+import * as path from "path";
+import * as zlib from "zlib";
+import {
+    Args,
+    Command,
+    Opts,
+    validateAppDir,
+    validateBoardType,
+} from "./command";
+import { Board } from "../boards";
+import { logger } from "../logger";
+import { SerialAdapter } from "../adapters/serial_adapter";
+import { parsePayload, constructPayload } from "../protocol";
+import { extractCredentials, buildApp } from "../firmware";
+
+export class DevCommand extends Command {
+    public static command = "dev";
+    public static desc = "";
+    public static args = [];
+    public static opts = [
+        // TODO: Guess the file path.
+        {
+            name: "--device <path>",
+            desc: "The device file path.",
+            required: true,
+        },
+        {
+            name: "--baudrate <rate>",
+            desc: "The serial port device file.",
+            default: 115200,
+        },
+        {
+            name: "--app-dir <path>",
+            desc: "The app directory.",
+            default: process.cwd(),
+            validator: validateAppDir,
+        },
+        // TODO: get the board type from package.json
+        {
+            name: "--board <board>",
+            desc: "The board type (only 'esp32' for now).",
+            default: "esp32",
+            validator: validateBoardType,
+        },
+    ];
+
+    private board!: Board;
+    private firmwareVersion!: number;
+    private firmwareImage!: Buffer;
+    private adapter!: SerialAdapter;
+    private verifiedPong: boolean = false;
+
+    public async run(args: Args, opts: Opts) {
+        this.board = opts.board;
+        this.adapter = new SerialAdapter();
+
+        // Open the serial port.
+        await this.adapter.open(opts.device, opts.baudrate, pkt =>
+            this.processPacket(pkt)
+        );
+
+        // First, build the firmware. We need the firmware file in order to send
+        // the latest version info in a heartbeat.
+        if (!(await this.build(opts.appDir))) {
+            logger.error("fix build errors and run the command again");
+            process.exit(1);
+        }
+
+        // Watch for the app source files.
+        fs.watch(opts.appDir, async (_event: string, filename: string) => {
+            const appFile = path.join(opts.appDir, "app.js");
+            if (filename == "app.js" && fs.existsSync(appFile)) {
+                logger.progress("Change detected, rebuilding...");
+                await this.build(opts.appDir);
+            }
+        });
+
+        // Send heartbeats regularly.
+        this.sendHeartbeat();
+        // TODO: Disable heartbeaing on firmware updating.
+        setInterval(() => this.sendHeartbeat(), 2000);
+
+        // Make sure that connected device is running the our firmware.
+        setTimeout(() => {
+            if (!this.verifiedPong) {
+                logger.error(
+                    "The device doesn't respond our health check.\nHint: Run `makestack flash --dev` to install the firmware."
+                );
+                process.exit(1);
+            }
+        }, 5000);
+
+        logger.success(
+            `We're ready! Watching for changes on ${opts.appDir}...`
+        );
+    }
+
+    private async build(appDir: string) {
+        if (!(await buildApp(this.board, appDir))) {
+            return false;
+        }
+
+        this.firmwareVersion = extractCredentials(
+            this.board.getFirmwarePath()
+        ).version;
+        this.firmwareImage = fs.readFileSync(this.board.getFirmwarePath());
+        return true;
+    }
+
+    private sendHeartbeat() {
+        this.adapter.send(
+            constructPayload({
+                version: this.firmwareVersion,
+                ping: {
+                    data: Buffer.from("HELO"),
+                },
+                corruptRateCheck: {
+                    length: 512,
+                },
+            })
+        );
+    }
+
+    private processPacket(pkt: Buffer) {
+        const payload = parsePayload(pkt);
+        if (payload.pong) {
+            this.verifiedPong = true;
+        }
+
+        if (payload.firmwareRequest) {
+            if (payload.firmwareRequest.version != this.firmwareVersion) {
+                logger.warn(
+                    `invalid version: ${payload.firmwareRequest.version}`
+                );
+                return;
+            }
+
+            const offset = payload.firmwareRequest.offset;
+            const DATA_LEN = 8192;
+            const data = this.firmwareImage.slice(offset, offset + DATA_LEN);
+            let firmwareDataPayload;
+            if (data.length > 0) {
+                const compressed = zlib.deflateSync(data);
+                if (compressed.length < data.length) {
+                    firmwareDataPayload = constructPayload({
+                        firmwareData: {
+                            offset,
+                            type: "deflate",
+                            data: compressed,
+                        },
+                    });
+                } else {
+                    firmwareDataPayload = constructPayload({
+                        firmwareData: { offset, type: "raw", data },
+                    });
+                }
+            } else {
+                firmwareDataPayload = constructPayload({
+                    firmwareData: { offset, type: "eof", data },
+                });
+            }
+
+            console.log(
+                `Uploading len=${data.length}, offset=${offset} (${Math.floor(
+                    (offset / this.firmwareImage.length) * 100
+                )}%)`
+            );
+            this.adapter.send(firmwareDataPayload);
+        }
+    }
+}

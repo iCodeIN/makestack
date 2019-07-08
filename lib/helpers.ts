@@ -1,0 +1,39 @@
+import * as path from "path";
+import { spawnSync, SpawnSyncOptions } from "child_process";
+
+export function resolveRepoPath(relpath: string): string {
+    return path.join(__dirname, "..", relpath);
+}
+
+export function bufferReplace(buf: Buffer, from: Buffer, to: Buffer): Buffer {
+    let current = 0;
+    for (;;) {
+        const index = buf.indexOf(from, current);
+        if (index < 0) {
+            return buf;
+        }
+
+        const before = buf.slice(0, index);
+        const after = buf.slice(index + from.length);
+
+        // In case to.length < from.length.
+        const newLen = index + to.length + after.length;
+
+        buf = Buffer.concat([before, to, after], newLen);
+        current = index + to.length;
+    }
+}
+
+export function exec(argv: string[], options: SpawnSyncOptions = {}) {
+    const exe = argv[0];
+    const args = argv.slice(1);
+    const r = spawnSync(exe, args, Object.assign({}, {
+        stdio: "inherit",
+        env: process.env,
+        encoding: "utf-8",
+    }, options));
+
+    if (r.status !== 0) {
+        throw new Error(`${exe} exited with ${r.status}`);
+    }
+}
