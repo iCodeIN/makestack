@@ -4,5 +4,5 @@
 __cred_header:
     .ascii "__MAKESTACK_CRED_START__"
 __cred:
-    .space 256
+    .space 1024
     .ascii "__MAKESTACK_CRED_END__"

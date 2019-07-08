@@ -5,6 +5,11 @@
 
 struct cred {
     uint64_t version;
+    // These ASCII strings are guaranteed null-terminated.
+    // wifi_ssid is an empty string if the wifi_adapter is disabled.
+    char wifi_ssid[64];
+    char wifi_password[64];
+    char server_url[256];
 };
 
 const extern struct cred __cred;

@@ -2,10 +2,14 @@
 import argparse
 import struct
 import sys
+import os
 
 """
 struct cred {
-    char sha256sum[32];
+    uint64_t version;
+    char wifi_ssid[64];
+    char wifi_password[64];
+    char server_url[256];
 };
 """
 
@@ -14,10 +18,30 @@ def main():
     parser.add_argument("file")
     parser.add_argument("--endian", default="little")
     parser.add_argument("--version")
+    parser.add_argument("--wifi-ssid",
+        help="The Wi-Fi SSID. Specify an empty string to disable the Wi-Fi adapter.")
+    parser.add_argument("--server-url")
     args = parser.parse_args()
 
+    # Don't pass the password from the command line argument!
+    wifi_password = os.environ.get("WIFI_PASSWORD")
+    if len(args.wifi_ssid) > 0 and wifi_password is None:
+        sys.exit("WIFI_PASSWORD environment variable is not set")
+
+    # Subtract the max len by 1 to guarantee that strings are null-terminated.
+    if len(args.wifi_ssid) > 64 - 1:
+        sys.exit("too long wifi ssid")
+    if len(wifi_password) > 64 - 1:
+        sys.exit("too long wifi password")
+    if len(args.server_url) > 256 - 1:
+        sys.exit("too long server URL")
+
     endian = "<" if args.endian == "little" else ">"
-    cred = struct.pack(endian + "Q", int(args.version))
+    cred = struct.pack(endian + "Q64s64s256s",
+        int(args.version),
+        bytes(args.wifi_ssid, "utf-8"),
+        bytes(wifi_password, "utf-8"),
+        bytes(args.server_url, "utf-8"))
 
     with open(args.file, "rb") as f:
         image = f.read()

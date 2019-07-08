@@ -10,9 +10,9 @@ import {
 } from "./command";
 import { Board } from "../boards";
 import { logger } from "../logger";
-import { SerialAdapter } from "../adapters/serial_adapter";
 import { parsePayload, constructPayload } from "../protocol";
 import { extractCredentials, buildApp } from "../firmware";
+import { SerialAdapter, WiFiAdapter } from "../adapters";
 
 export class DevCommand extends Command {
     public static command = "dev";
@@ -43,22 +43,62 @@ export class DevCommand extends Command {
             default: "esp32",
             validator: validateBoardType,
         },
+        {
+            name: "--adapter <adapter>",
+            desc: "The adapter type ('serial' or 'wifi').",
+            default: "serial",
+        },
     ];
 
     private board!: Board;
     private firmwareVersion!: number;
     private firmwareImage!: Buffer;
-    private adapter!: SerialAdapter;
     private verifiedPong: boolean = false;
 
     public async run(args: Args, opts: Opts) {
         this.board = opts.board;
-        this.adapter = new SerialAdapter();
+        switch (opts.adapter) {
+            case "serial":
+                const serialAdapter = new SerialAdapter();
+                await serialAdapter.open(opts.device, opts.baudrate, payload => {
 
-        // Open the serial port.
-        await this.adapter.open(opts.device, opts.baudrate, pkt =>
-            this.processPacket(pkt)
-        );
+                    const reply = this.processPayload(payload);
+                    if (reply) {
+                        serialAdapter.send(reply);
+                    }
+                });
+
+                // Send heartbeats regularly.
+                // TODO: Disable heartbeaing on firmware updating.
+                serialAdapter.send(this.buildHeartbeatPayload());
+                setInterval(() => {
+                    serialAdapter.send(this.buildHeartbeatPayload());
+                }, 2000);
+
+                // Make sure that connected device is running the our firmware.
+                setTimeout(() => {
+                    if (!this.verifiedPong) {
+                        logger.error(
+                            "The device doesn't respond our health check.\nHint: Run `makestack flash --dev` to install the firmware."
+                        );
+                        process.exit(1);
+                    }
+                }, 5000);
+                break;
+            case "wifi":
+                const wifiAdapter = new WiFiAdapter();
+                wifiAdapter.start(payload => {
+                    let reply = this.processPayload(payload);
+                    if (!reply) {
+                        reply = this.buildHeartbeatPayload();
+                    }
+                    return reply;
+                });
+                break;
+            default:
+                throw new Error(`Unknown adapter type: \`${opts.adapter}'`);
+        }
+
 
         // First, build the firmware. We need the firmware file in order to send
         // the latest version info in a heartbeat.
@@ -75,21 +115,6 @@ export class DevCommand extends Command {
                 await this.build(opts.appDir);
             }
         });
-
-        // Send heartbeats regularly.
-        this.sendHeartbeat();
-        // TODO: Disable heartbeaing on firmware updating.
-        setInterval(() => this.sendHeartbeat(), 2000);
-
-        // Make sure that connected device is running the our firmware.
-        setTimeout(() => {
-            if (!this.verifiedPong) {
-                logger.error(
-                    "The device doesn't respond our health check.\nHint: Run `makestack flash --dev` to install the firmware."
-                );
-                process.exit(1);
-            }
-        }, 5000);
 
         logger.success(
             `We're ready! Watching for changes on ${opts.appDir}...`
@@ -108,22 +133,20 @@ export class DevCommand extends Command {
         return true;
     }
 
-    private sendHeartbeat() {
-        this.adapter.send(
-            constructPayload({
-                version: this.firmwareVersion,
-                ping: {
-                    data: Buffer.from("HELO"),
-                },
-                corruptRateCheck: {
-                    length: 512,
-                },
-            })
-        );
+    private buildHeartbeatPayload(): Buffer {
+        return constructPayload({
+            version: this.firmwareVersion,
+            ping: {
+                data: Buffer.from("HELO"),
+            },
+            corruptRateCheck: {
+                length: 512,
+            },
+        });
     }
 
-    private processPacket(pkt: Buffer) {
-        const payload = parsePayload(pkt);
+    private processPayload(rawPayload: Buffer):  Buffer | null {
+        const payload = parsePayload(rawPayload);
         if (payload.pong) {
             this.verifiedPong = true;
         }
@@ -133,7 +156,7 @@ export class DevCommand extends Command {
                 logger.warn(
                     `invalid version: ${payload.firmwareRequest.version}`
                 );
-                return;
+                return null;
             }
 
             const offset = payload.firmwareRequest.offset;
@@ -166,7 +189,10 @@ export class DevCommand extends Command {
                     (offset / this.firmwareImage.length) * 100
                 )}%)`
             );
-            this.adapter.send(firmwareDataPayload);
+
+            return firmwareDataPayload;
         }
+
+        return null;
     }
 }

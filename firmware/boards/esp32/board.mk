@@ -12,6 +12,10 @@ $(COMMANDS):
 build:
 	$(MAKE) -f $(BOARD_DIR)/esp_idf.mk all_binaries
 	echo Embedding the credential...
-	./embed-cred.py --version $(shell date "+%s") $(BUILD_DIR)/firmware.elf
+	WIFI_PASSWORD="$(WIFI_PASSWORD)" ./embed-cred.py \
+		--version $(shell date "+%s") \
+		--wifi-ssid "$(WIFI_SSID)" \
+		--server-url "$(SERVER_URL)" \
+		$(BUILD_DIR)/firmware.elf
 	rm -f $(BUILD_DIR)/firmware.bin
 	$(MAKE) -f $(BOARD_DIR)/esp_idf.mk build_bin
