@@ -38,7 +38,7 @@ export class SerialCommand extends Command {
         },
         {
             name: "--baudrate <rate>",
-            desc: "The serial port device file.",
+            desc: "The baudrate.",
             default: 115200,
         },
     ];
