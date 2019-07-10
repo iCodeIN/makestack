@@ -32,7 +32,7 @@ export abstract class Command {
     public static command: string;
     public static desc: string;
     public static args: ArgDefinition[];
-    public static opt: OptDefinition[];
+    public static opts: OptDefinition[];
     public abstract async run(args: Args, opts: Opts): Promise<void>;
 }
 
