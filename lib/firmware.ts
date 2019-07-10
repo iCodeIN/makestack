@@ -22,23 +22,11 @@ export function extractCredentials(path: string): Credential {
 }
 
 // Returns true on succcess.
-export async function buildApp(board: Board, appDir: string): Promise<boolean> {
+export async function buildApp(board: Board, appDir: string) {
     const appFile = path.join(appDir, "app.js");
     const appJs = fs.readFileSync(appFile, "utf-8");
-    try {
-        logger.progress(`Transpiling ${appFile}`);
-        const appCpp = transpile(appJs);
-        logger.progress("Building the firmware...");
-        await board.buildFirmware(appDir, appCpp);
-    } catch(e) {
-        if (e instanceof BuildError) {
-            logger.error("failed to build");
-            return false;
-        } else {
-            throw e;
-        }
-    }
-
-    logger.success("Build succeeded");
-    return true;
+    logger.progress(`Transpiling ${appFile}`);
+    const appCpp = transpile(appJs);
+    logger.progress("Building the firmware...");
+    await board.buildFirmware(appDir, appCpp);
 }

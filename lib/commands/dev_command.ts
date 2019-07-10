@@ -5,11 +5,11 @@ import {
     Args,
     Command,
     Opts,
-    validateAppDir,
-    validateBoardType,
-    validateDeviceFilePath,
+    APP_OPTS,
+    BOARD_OPTS,
+    BUILD_OPTS,
 } from "./command";
-import { Board } from "../boards";
+import { Board, BuildError } from "../boards";
 import { logger } from "../logger";
 import { parsePayload, constructPayload } from "../protocol";
 import { extractCredentials, buildApp } from "../firmware";
@@ -21,35 +21,9 @@ export class DevCommand extends Command {
     public static desc = "";
     public static args = [];
     public static opts = [
-        {
-            name: "--device <path>",
-            desc: "The device file path.",
-            default: "",
-            validator: validateDeviceFilePath,
-        },
-        {
-            name: "--baudrate <rate>",
-            desc: "The baudrate.",
-            default: 115200,
-        },
-        {
-            name: "--app-dir <path>",
-            desc: "The app directory.",
-            default: process.cwd(),
-            validator: validateAppDir,
-        },
-        // TODO: get the board type from package.json
-        {
-            name: "--board <board>",
-            desc: "The board type (only 'esp32' for now).",
-            default: "esp32",
-            validator: validateBoardType,
-        },
-        {
-            name: "--adapter <adapter>",
-            desc: "The adapter type ('serial' or 'wifi').",
-            default: "serial",
-        },
+        ...APP_OPTS,
+        ...BOARD_OPTS,
+        ...BUILD_OPTS,
     ];
 
     private board!: Board;
@@ -124,14 +98,22 @@ export class DevCommand extends Command {
     }
 
     private async build(appDir: string) {
-        if (!(await buildApp(this.board, appDir))) {
-            return false;
+        try {
+            await buildApp(this.board, appDir);
+        } catch (e) {
+            if (e instanceof BuildError) {
+                logger.error("failed to build");
+                return false;
+            } else {
+                throw e;
+            }
         }
 
-        this.firmwareVersion = extractCredentials(
-            this.board.getFirmwarePath()
-        ).version;
-        this.firmwareImage = fs.readFileSync(this.board.getFirmwarePath());
+        const firmwarePath = this.board.getFirmwarePath();
+        this.firmwareVersion = extractCredentials(firmwarePath).version;
+        this.firmwareImage = fs.readFileSync(firmwarePath);
+
+        logger.success("Build succeeded");
         return true;
     }
 

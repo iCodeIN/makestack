@@ -15,8 +15,13 @@ for (const klass of commands) {
         cmd.argument(arg.name, arg.desc, arg.validator, arg.default);
     }
 
+    let addedOpts: string[] = [];
     for (const opt of klass.opts) {
-        cmd.option(opt.name, opt.desc, opt.validator, opt.default, opt.required);
+        if (!addedOpts.includes(opt.name)) {
+            cmd.option(opt.name, opt.desc, opt.validator, opt.default, opt.required);
+        }
+
+        addedOpts.push(opt.name);
     }
 
     cmd.action(async (args, opts) => {

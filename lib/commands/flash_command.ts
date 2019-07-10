@@ -2,8 +2,8 @@ import {
     Args,
     Command,
     Opts,
-    validateAppDir,
-    validateBoardType,
+    DEVICE_FILE_OPTS,
+    BUILD_OPTS,
 } from "./command";
 import { Board } from "../boards";
 import { buildApp } from "../firmware";
@@ -14,32 +14,13 @@ export class FlashCommand extends Command {
     public static desc = "";
     public static args = [];
     public static opts = [
-        // TODO: Guess the file path.
-        {
-            name: "--device <path>",
-            desc: "The serial port device file.",
-            required: true,
-        },
-        {
-            name: "--app-dir <path>",
-            desc: "The app directory.",
-            default: process.cwd(),
-            validator: validateAppDir,
-        },
-        // TODO: get the board type from package.json
-        {
-            name: "--board <board>",
-            desc: "The board type (only 'esp32' for now).",
-            default: "esp32",
-            validator: validateBoardType,
-        },
+        ...BUILD_OPTS,
+        ...DEVICE_FILE_OPTS,
     ];
 
-    public async run(args: Args, opts: Opts) {
+    public async run(_args: Args, opts: Opts) {
         const board: Board = opts.board;
-        if (!(await buildApp(board, opts.appDir))) {
-            process.exit(1);
-        }
+        await buildApp(board, opts.appDir);
 
         logger.progress("Flashing...");
         await board.flashFirmware(opts.device, board.getFirmwarePath());

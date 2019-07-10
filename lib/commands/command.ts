@@ -87,3 +87,46 @@ export const validateDeviceFilePath: Validator = (deviceFile: string): any => {
 
     return path.join("/dev", candidates[0]);
 }
+
+export const APP_OPTS = [
+    {
+        name: "--app-dir <path>",
+        desc: "The app directory.",
+        default: process.cwd(),
+        validator: validateAppDir,
+    },
+];
+
+export const ADAPTER_OPTS = [
+    {
+        name: "--adapter <adapter>",
+        desc: "The adapter type ('serial' or 'wifi').",
+        default: "serial",
+    },
+]
+
+export const BOARD_OPTS = [
+    // TODO: get the board type from package.json
+    {
+        name: "--board <board>",
+        desc: "The board type (only 'esp32' for now).",
+        default: "esp32",
+        validator: validateBoardType,
+    },
+];
+
+export const DEVICE_FILE_OPTS = [
+    {
+        name: "--device <path>",
+        desc: "The device file path.",
+        default: "",
+        validator: validateDeviceFilePath,
+    },
+    {
+        name: "--baudrate <rate>",
+        desc: "The baudrate.",
+        default: 115200,
+    },
+];
+
+export const BUILD_OPTS = [...APP_OPTS, ...BOARD_OPTS];

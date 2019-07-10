@@ -2,7 +2,7 @@ import {
     Args,
     Command,
     Opts,
-    validateDeviceFilePath,
+    DEVICE_FILE_OPTS,
 } from "./command";
 import * as SerialPort from "serialport";
 const SerialPortDelimiter = require("@serialport/parser-delimiter");
@@ -30,17 +30,7 @@ export class SerialCommand extends Command {
     public static desc = "";
     public static args = [];
     public static opts = [
-        {
-            name: "--device <path>",
-            desc: "The serial port device file.",
-            default: "",
-            validator: validateDeviceFilePath,
-        },
-        {
-            name: "--baudrate <rate>",
-            desc: "The baudrate.",
-            default: 115200,
-        },
+        ...DEVICE_FILE_OPTS,
     ];
 
     public async run(args: Args, opts: Opts) {
