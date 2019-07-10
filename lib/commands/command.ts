@@ -33,6 +33,7 @@ export abstract class Command {
     public static desc: string;
     public static args: ArgDefinition[];
     public static opts: OptDefinition[];
+    public static watchMode: boolean;
     public abstract async run(args: Args, opts: Opts): Promise<void>;
 }
 
@@ -130,3 +131,11 @@ export const DEVICE_FILE_OPTS = [
 ];
 
 export const BUILD_OPTS = [...APP_OPTS, ...BOARD_OPTS];
+
+export const WATCH_OPTS = [
+    {
+        name: "--watch",
+        desc: "Watch files for changes and ru-run the command.",
+        default: false,
+    }
+]

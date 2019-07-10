@@ -1,7 +1,9 @@
 import * as caporal from "caporal";
+import * as fs from "fs";
 import * as path from "path";
 import { commands } from "./commands";
 import { logger } from "./logger";
+import { WATCH_OPTS, OptDefinition } from "./commands/command";
 const { version } = require(path.resolve(__dirname, "../package.json"));
 
 caporal.description("A minimalistic IoT framework for super-rapid prototyping.");
@@ -15,8 +17,13 @@ for (const klass of commands) {
         cmd.argument(arg.name, arg.desc, arg.validator, arg.default);
     }
 
+    let opts: OptDefinition[] = klass.opts;
+    if (klass.watchMode) {
+        opts = [...opts, ...WATCH_OPTS];
+    }
+
     let addedOpts: string[] = [];
-    for (const opt of klass.opts) {
+    for (const opt of opts) {
         if (!addedOpts.includes(opt.name)) {
             cmd.option(opt.name, opt.desc, opt.validator, opt.default, opt.required);
         }
@@ -28,6 +35,12 @@ for (const klass of commands) {
         const instance = new klass();
         try {
             await instance.run(args, opts);
+            if (opts.watch) {
+                logger.info("Watching app.js for changes...")
+                fs.watchFile(path.join(opts.appDir, "app.js"), () => {
+                    instance.run(args, opts);
+                });
+            }
         } catch (e) {
             logger.error(e.stack);
             process.exit(1);

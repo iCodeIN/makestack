@@ -25,13 +25,14 @@ export class DevCommand extends Command {
         ...BOARD_OPTS,
         ...BUILD_OPTS,
     ];
+    public static watchMode = true;
 
     private board!: Board;
     private firmwareVersion!: number;
     private firmwareImage!: Buffer;
     private verifiedPong: boolean = false;
 
-    public async run(args: Args, opts: Opts) {
+    public async run(_args: Args, opts: Opts) {
         this.board = opts.board;
 
         // First, build the firmware. We need the firmware file in order to send
