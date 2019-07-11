@@ -5,8 +5,8 @@ function main(args, opts) {
     console.log("==> Starting...");
     admin.initializeApp({
         credential: admin.credential.applicationDefault(),
-        projectId: "makestack-test",
-//        databaseURL: opts.databaseUrl,
+        projectId: opts.project,
+        databaseURL: opts.databaseUrl,
     });
 
     const db = admin.firestore();
@@ -31,6 +31,7 @@ function main(args, opts) {
 }
 
 cli
+    .option("--project <project>", "The firebase project ID.", null, null, true)
     .option("--database-url <url>", "The firebase database URL.", null, null, true)
     .action((args, opts) => {
         main(args, opts);
