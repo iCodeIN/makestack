@@ -1,0 +1,32 @@
+{
+  "name": "makestack-dashboard",
+  "version": "2.0.0",
+  "main": "dist/index.js",
+  "author": "Seiya Nuta <nuta@seiya.me>",
+  "homepage": "https://makestack.org",
+  "license": "(CC0-1.0 OR MIT)",
+  "typings": "dist/index.d.ts",
+  "scripts": {
+    "build": "rm -rf dist parcel build index.html -d dist",
+    "dev": "parcel index.html --open --port 8088"
+  },
+  "devDependencies": {
+    "@types/chart.js": "^2.7.55",
+    "@vue/component-compiler-utils": "^3.0.0",
+    "caporal": "^1.2.0",
+    "firebase-admin": "^8.2.0",
+    "parcel-bundler": "^1.12.3",
+    "sass": "^1.22.3",
+    "typescript": "^3.5.3",
+    "vue-class-component": "^7.1.0",
+    "vue-hot-reload-api": "^2.3.3",
+    "vue-property-decorator": "^8.2.1",
+    "vue-template-compiler": "^2.6.10"
+  },
+  "dependencies": {
+    "chart.js": "^2.8.0",
+    "firebase": "^6.2.4",
+    "vue": "^2.6.10",
+    "vue-router": "^3.0.7"
+  }
+}
