@@ -26,6 +26,10 @@ function main() {
     eval(appJs);
 
     const server = express();
+    server.use((req, res, next) => {
+        console.log(chalk.magenta.bold(`[HTTP] ${req.method} ${req.path}`));
+        next();
+    });
 
     // Forward requests to the dev server.
     server.use(
