@@ -20,14 +20,14 @@ void vm_port_panic(const char *fmt, ...) {
 void vm_port_print(const char *fmt, ...) {
     va_list vargs;
     va_start(vargs, fmt);
-    vprintf(fmt, vargs);
+    vlogger(fmt, vargs);
     va_end(vargs);
 }
 
 void vm_port_debug(const char *fmt, ...) {
     va_list vargs;
     va_start(vargs, fmt);
-    vprintf(fmt, vargs);
+    vlogger(fmt, vargs);
     va_end(vargs);
 }
 
