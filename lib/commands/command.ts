@@ -64,6 +64,15 @@ export const validateBoardType: Validator = (boardType: string): any => {
     return require(`../boards/${boardType}`);
 };
 
+const availableCloudTypes = ["firebase"];
+export const validateCloudType: Validator = (cloudType: string): any => {
+    if (!availableCloudTypes.includes(cloudType)) {
+        throw new Error("Invalid cloud type.");
+    }
+
+    return require(`../clouds/${cloudType}`);
+};
+
 
 const deviceFilePatterns = [
     /tty\.usbserial-.+/,
