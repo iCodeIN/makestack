@@ -1,4 +1,5 @@
 import * as path from "path";
+import * as nunjucks from "nunjucks";
 import { spawnSync, SpawnSyncOptions } from "child_process";
 
 export function resolveRepoPath(relpath: string): string {
@@ -48,4 +49,9 @@ export function bytesToReadableString(bytes: number): string {
     }
 
     return base.toFixed(2) + units[i];
+}
+
+export function render(template: string, ctx: { [name: string]: string }) {
+    nunjucks.configure({ autoescape: false });
+    return nunjucks.renderString(template, ctx);
 }

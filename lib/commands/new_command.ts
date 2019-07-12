@@ -36,6 +36,7 @@ const GITIGNORE = `\
 
 function genFile(filepath: string, template: string, ctx: any) {
     logger.action("create", filepath);
+    nunjucks.configure({ autoescape: false });
     fs.writeFileSync(filepath, nunjucks.renderString(template, ctx));
 }
 

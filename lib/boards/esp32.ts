@@ -23,7 +23,7 @@ export async function flashFirmware(devicePath: string, firmwarePath: string) {
     });
 }
 
-export async function buildFirmware(appDir: string, appCpp: string) {
+export async function buildFirmware(appDir: string, appCxx: string) {
     const buildLogPath = path.join(appDir, "build.log");
     const firmwareDir = resolveRepoPath("firmware");
     const buildDir = path.join(firmwareDir, "build/esp32");
@@ -35,7 +35,7 @@ export async function buildFirmware(appDir: string, appCpp: string) {
     const componentMk = "CXXFLAGS += -fdiagnostics-color=always";
     fs.mkdirSync(componentDir, { recursive: true });
     fs.writeFileSync(path.join(componentDir, "component.mk"), componentMk);
-    fs.writeFileSync(path.join(componentDir, "app.cpp"), appCpp);
+    fs.writeFileSync(path.join(componentDir, "app.cpp"), appCxx);
 
     await make(firmwareDir, componentDir, buildLogPath);
 }

@@ -1,12 +1,18 @@
-const APP_CPP_TEMPLATE = `\
-#include <stdio.h>
+import * as t from "@babel/types";
+import { Transpiler } from "./transpiler";
 
-void app_setup() {
-    printf("Hello from makestack_app_main!\\n");
+export class TranspileError extends Error {
+    public node: t.Node;
+    constructor(node: t.Node, message: string) {
+        super(message);
+        this.node = node;
+    }
 }
-`;
 
-export function transpile(code: string) {
-    // TODO:
-    return APP_CPP_TEMPLATE;
+export class UnimplementedError extends TranspileError {
+    constructor(node: t.Node) {
+        super(node, `Unimplemented language feature: \`${node.type}'`);
+    }
 }
+
+export { Transpiler };
