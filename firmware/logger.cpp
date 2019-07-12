@@ -15,7 +15,11 @@ void init_logger() {
 void logger(const char *format, ...) {
     va_list vargs;
     va_start(vargs, format);
+    vlogger(format, vargs);
+    va_end(vargs);
+}
 
+void vlogger(const char *format, va_list vargs) {
     char buf[256];
     size_t str_len = vsnprintf(buf, sizeof(buf), format, vargs);
     printf("%s", (char *) &buf);
@@ -32,8 +36,6 @@ void logger(const char *format, ...) {
     } else {
         write_p += copy_len1;
     }
-
-    va_end(vargs);
 }
 
 char *read_logger_buffer(size_t *length) {

@@ -12,6 +12,7 @@
 
 void init_logger();
 void logger(const char *format, ...);
+void vlogger(const char *format, va_list vargs);
 char *read_logger_buffer(size_t *length);
 
 #endif
