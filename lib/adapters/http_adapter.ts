@@ -16,7 +16,6 @@ export class HTTPAdapter {
         });
 
         server.post("/makestack/protocol", (req, res) => {
-            logger.debug("/makestack/protocol");
             const reply = onRecv((req as any).rawBody);
             res.status(200);
             res.type("application/octet-stream");
