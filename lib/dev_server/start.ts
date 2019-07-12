@@ -32,10 +32,10 @@ function main() {
     });
 
     // Forward requests to the dev server.
-    server.use(
-        "/makestack",
-        proxy({ target: `http://localhost:${devServerPort}`, changeOrigin: true })
-    );
+    server.use(proxy("/makestack", {
+        target: `http://localhost:${devServerPort}`,
+        changeOrigin: true
+    }));
 
     const endpoints: any = (global as any).__httpEndpoints;
     for (const [method, callbacks] of Object.entries(endpoints)) {
