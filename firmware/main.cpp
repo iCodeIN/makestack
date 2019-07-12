@@ -11,23 +11,13 @@ void app_task() {
     vTaskDelete(NULL);
  }
 
-esp_err_t system_event_callback(void *ctx, system_event_t *event) {
-    if (event->event_id == SYSTEM_EVENT_STA_GOT_IP) {
-        got_ip_event_handler();
-    }
-
-    return ESP_OK;
-}
-
 void supervisor_main() {
     init_logger();
     printf("\n");
 
     INFO("[Makestack] Hello!");
     INFO("[Makestack] version=%llu", __cred.version);
-    nvs_flash_init();
-    tcpip_adapter_init();
-    esp_event_loop_init(system_event_callback, NULL);
+    initArduino();
 
     if (!strcmp(__cred.adapter, "serial")) {
         xTaskCreate((TaskFunction_t) &serial_adapter_task, "serial_adapter_task", 8192 * 4, NULL, 10, NULL);

@@ -87,33 +87,17 @@ public:
     }
 };
 
-static bool connected = false;
-void got_ip_event_handler() {
-    connected = true;
-}
-
 void connect_wifi() {
-    wifi_init_config_t init_config = WIFI_INIT_CONFIG_DEFAULT();
-    wifi_config_t config;
-    memset(&config, 0, sizeof(config));
-    strcpy((char *)config.sta.ssid, __cred.wifi_ssid);
-    strcpy((char *)config.sta.password, __cred.wifi_password);
+    INFO("Connecting to '%s'...", __cred.wifi_ssid);
+    WiFi.begin(__cred.wifi_ssid, __cred.wifi_password);
 
-    esp_wifi_init(&init_config);
-    esp_wifi_set_storage(WIFI_STORAGE_RAM);
-    esp_wifi_set_mode(WIFI_MODE_STA);
-    esp_wifi_set_config(WIFI_IF_STA, &config);
-    esp_wifi_start();
-    esp_wifi_connect();
-
-    int retries = 30;
-    while (!connected && retries > 0) {
-        INFO("Connecting to '%s'...", __cred.wifi_ssid);
-        vTaskDelay(1000 / portTICK_PERIOD_MS);
-        retries--;
+    int timeout = 10;
+    while (timeout > 0 && WiFi.status() != WL_CONNECTED) {
+        delay(1000);
+        timeout--;
     }
 
-    if (!retries) {
+    if (!timeout) {
         WARN("failed to connect to %s", __cred.wifi_ssid);
         vTaskDelete(NULL);
     }
