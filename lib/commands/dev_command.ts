@@ -16,7 +16,7 @@ import { Board, BuildError } from "../boards";
 import { logger } from "../logger";
 import { parsePayload, constructPayload } from "../protocol";
 import { extractCredentials, buildApp } from "../firmware";
-import { SerialAdapter, WiFiAdapter } from "../adapters";
+import { SerialAdapter, HTTPAdapter } from "../adapters";
 import { bytesToReadableString } from "../helpers";
 import { DevServer } from "../dev_server";
 
@@ -51,7 +51,7 @@ export class DevCommand extends Command {
     ];
     public static watchMode = true;
 
-    private wifiAdapter!: WiFiAdapter;
+    private httpAdapter!: HTTPAdapter;
     private board!: Board;
     private firmwareVersion!: number;
     private firmwareImage!: Buffer;
@@ -72,7 +72,7 @@ export class DevCommand extends Command {
 
         const httpServerPort = opts.port + 1;
         const httpServer = express();
-        new WiFiAdapter(httpServer, payload => {
+        new HTTPAdapter(httpServer, payload => {
             let reply = this.processPayload(payload);
             return reply ? reply : this.buildHeartbeatPayload();
         });
@@ -152,7 +152,7 @@ export class DevCommand extends Command {
                     }
                 }, 5000);
                 break;
-            case "wifi":
+            case "http":
                 /* Already running. */
                 break;
             default:

@@ -1,3 +1,3 @@
 import { SerialAdapter } from "./serial_adapter";
-import { WiFiAdapter } from "./wifi_adapter";
-export { SerialAdapter, WiFiAdapter };
+import { HTTPAdapter } from "./http_adapter";
+export { SerialAdapter, HTTPAdapter };

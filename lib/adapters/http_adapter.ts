@@ -1,7 +1,7 @@
 import * as express from "express";
 import { logger } from "../logger";
 
-export class WiFiAdapter {
+export class HTTPAdapter {
     public constructor(server: express.Express, onRecv: (payload: Buffer) => Buffer | null) {
         server.use((req: any, res: express.Response, next: Function) => {
             req.rawBody = Buffer.alloc(0);
