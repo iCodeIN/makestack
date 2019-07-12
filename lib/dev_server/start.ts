@@ -3,6 +3,9 @@ import * as fs from "fs";
 import * as path from "path";
 import * as express from "express";
 import * as proxy from "http-proxy-middleware";
+const chalk = require("chalk");
+chalk.enabled = true;
+chalk.level = 2;
 
 function main() {
     // These environment variables are should be passed by DevServer.
