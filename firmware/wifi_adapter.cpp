@@ -128,6 +128,7 @@ void send_and_receive_payload(String &url) {
         http.begin(url);
     }
 
+    http.addHeader("Content-Type", "application/octet-stream");
     http.addHeader("Connection", "close");
 
     DEBUG("POST %s", url.c_str());
