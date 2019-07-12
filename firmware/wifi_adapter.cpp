@@ -178,7 +178,7 @@ void wifi_adapter_task() {
     connect_wifi();
 
     String url = __cred.server_url;
-    url += "/protocol";
+    url += "/makestack/protocol";
     while (1) {
         send_and_receive_payload(url);
         vTaskDelay(1000 / portTICK_PERIOD_MS);
