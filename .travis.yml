@@ -19,7 +19,7 @@ jobs:
       install:
         - yarn
       script:
-        - yarn build
+        - yarn test
 
 cache:
   yarn: true
