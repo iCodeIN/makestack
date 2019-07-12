@@ -1,0 +1,31 @@
+language: node_js
+
+jobs:
+  include:
+    - stage: test
+      os: linux
+      node_js: "10"
+      install:
+        - yarn
+      script:
+        - yarn test
+      addons:
+        apt:
+          packages:
+
+    - os: osx
+      osx_image: xcode11
+      node_js: "10"
+      install:
+        - yarn
+      script:
+        - yarn build
+
+cache:
+  yarn: true
+  directories:
+    - firmware/deps
+
+notifications:
+  on_success: change
+  on_failure: change
