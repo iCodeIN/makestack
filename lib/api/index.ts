@@ -1,3 +1,4 @@
+import * as device from "./device";
 import * as server from "./server";
 
-export { server };
+export { device, server };
