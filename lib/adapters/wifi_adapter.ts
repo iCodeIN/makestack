@@ -2,8 +2,7 @@ import * as express from "express";
 import { logger } from "../logger";
 
 export class WiFiAdapter {
-    public start(onRecv: (payload: Buffer) => Buffer | null) {
-        const server = express();
+    public constructor(server: express.Express, onRecv: (payload: Buffer) => Buffer | null) {
         server.use((req: any, res: express.Response, next: Function) => {
             req.rawBody = Buffer.alloc(0);
 
@@ -16,16 +15,12 @@ export class WiFiAdapter {
             });
         });
 
-        server.post("/protocol", (req, res) => {
-            logger.debug("/protocol");
+        server.post("/makestack/protocol", (req, res) => {
+            logger.debug("/makestack/protocol");
             const reply = onRecv((req as any).rawBody);
             res.status(200);
             res.type("application/octet-stream");
             res.send(reply);
         });
-
-        // TODO: allow specifying the address and the port.
-        server.listen(1234, "0.0.0.0");
-        logger.success("listening on http://0.0.0.0:1234");
     }
 }

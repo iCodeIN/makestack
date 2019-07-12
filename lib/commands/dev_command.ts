@@ -1,6 +1,7 @@
 import * as fs from "fs";
 import * as path from "path";
 import * as zlib from "zlib";
+import * as express from "express";
 import {
     Args,
     Command,
@@ -8,6 +9,8 @@ import {
     APP_OPTS,
     BOARD_OPTS,
     BUILD_OPTS,
+    ADAPTER_OPTS,
+    validateDeviceFilePath,
 } from "./command";
 import { Board, BuildError } from "../boards";
 import { logger } from "../logger";
@@ -15,6 +18,7 @@ import { parsePayload, constructPayload } from "../protocol";
 import { extractCredentials, buildApp } from "../firmware";
 import { SerialAdapter, WiFiAdapter } from "../adapters";
 import { bytesToReadableString } from "../helpers";
+import { DevServer } from "../dev_server";
 
 export class DevCommand extends Command {
     public static command = "dev";
@@ -24,9 +28,30 @@ export class DevCommand extends Command {
         ...APP_OPTS,
         ...BOARD_OPTS,
         ...BUILD_OPTS,
+        ...ADAPTER_OPTS,
+        {
+            name: "--device <path>",
+            desc: "The device file path.",
+        },
+        {
+            name: "--baudrate <rate>",
+            desc: "The baudrate.",
+            default: 115200,
+        },
+        {
+            name: "--host <host>",
+            desc: "The dev server hostname.",
+            default: "0.0.0.0",
+        },
+        {
+            name: "--port <port>",
+            desc: "The dev server port.",
+            default: 1234,
+        },
     ];
     public static watchMode = true;
 
+    private wifiAdapter!: WiFiAdapter;
     private board!: Board;
     private firmwareVersion!: number;
     private firmwareImage!: Buffer;
@@ -37,58 +62,35 @@ export class DevCommand extends Command {
 
         // First, build the firmware. We need the firmware file in order to send
         // the latest version info in a heartbeat.
+
+        /*
         if (!(await this.build(opts.appDir))) {
             logger.error("fix build errors and run the command again");
             process.exit(1);
         }
+        */
 
-        switch (opts.adapter) {
-            case "serial":
-                const serialAdapter = new SerialAdapter();
-                await serialAdapter.open(opts.device, opts.baudrate, payload => {
+        const httpServerPort = opts.port + 1;
+        const httpServer = express();
+        new WiFiAdapter(httpServer, payload => {
+            let reply = this.processPayload(payload);
+            return reply ? reply : this.buildHeartbeatPayload();
+        });
+        httpServer.listen(httpServerPort, "127.0.0.1");
 
-                    const reply = this.processPayload(payload);
-                    if (reply) {
-                        serialAdapter.send(reply);
-                    }
-                });
+        logger.progress("Initializing the adapter...");
+        await this.initializeAdapter(opts.adapter, opts);
 
-                // Send heartbeats regularly.
-                // TODO: Disable heartbeaing on firmware updating.
-                serialAdapter.send(this.buildHeartbeatPayload());
-                setInterval(() => {
-                    serialAdapter.send(this.buildHeartbeatPayload());
-                }, 2000);
-
-                // Make sure that connected device is running the our firmware.
-                setTimeout(() => {
-                    if (!this.verifiedPong) {
-                        logger.error(
-                            "The device doesn't respond our health check.\nHint: Run `makestack flash --dev` to install the firmware."
-                        );
-                        process.exit(1);
-                    }
-                }, 5000);
-                break;
-            case "wifi":
-                const wifiAdapter = new WiFiAdapter();
-                wifiAdapter.start(payload => {
-                    let reply = this.processPayload(payload);
-                    if (!reply) {
-                        reply = this.buildHeartbeatPayload();
-                    }
-                    return reply;
-                });
-                break;
-            default:
-                throw new Error(`Unknown adapter type: \`${opts.adapter}'`);
-        }
+        logger.progress(`Starting a app...`);
+        const devServer = new DevServer(opts.host, opts.port, httpServerPort, opts.appDir);
+        logger.progress(`Listen on ${opts.host}:${opts.port}`);
 
         // Watch for the app source files.
         fs.watch(opts.appDir, async (_event: string, filename: string) => {
             const appFile = path.join(opts.appDir, "app.js");
             if (filename == "app.js" && fs.existsSync(appFile)) {
-                logger.progress("Change detected, rebuilding...");
+                logger.progress("Change detected, restarting and rebuilding the app...");
+                devServer.restart();
                 await this.build(opts.appDir);
             }
         });
@@ -116,6 +118,46 @@ export class DevCommand extends Command {
 
         logger.success("Build succeeded");
         return true;
+    }
+
+    private async initializeAdapter(adapter: string, opts: any) {
+        switch (adapter) {
+            case "serial":
+                // FIXME:
+                const device = (validateDeviceFilePath as any)(opts.device || "");
+
+                const serialAdapter = new SerialAdapter();
+                await serialAdapter.open(device, opts.baudrate, payload => {
+
+                    const reply = this.processPayload(payload);
+                    if (reply) {
+                        serialAdapter.send(reply);
+                    }
+                });
+
+                // Send heartbeats regularly.
+                // TODO: Disable heartbeaing on firmware updating.
+                serialAdapter.send(this.buildHeartbeatPayload());
+                setInterval(() => {
+                    serialAdapter.send(this.buildHeartbeatPayload());
+                }, 2000);
+
+                // Make sure that connected device is running the our firmware.
+                setTimeout(() => {
+                    if (!this.verifiedPong) {
+                        logger.error(
+                            "The device doesn't respond our health check.\nHint: Run `makestack flash --dev` to install the firmware."
+                        );
+                        process.exit(1);
+                    }
+                }, 5000);
+                break;
+            case "wifi":
+                /* Already running. */
+                break;
+            default:
+                throw new Error(`Unknown adapter type: \`${adapter}'`);
+        }
     }
 
     private buildHeartbeatPayload(): Buffer {

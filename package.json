@@ -24,9 +24,11 @@
     ],
     "dependencies": {
         "@serialport/parser-delimiter": "^2.0.2",
+        "@types/http-proxy-middleware": "^0.19.2",
         "caporal": "https://github.com/mattallty/Caporal.js#d10cd8724c6ab5e81da3a6ae8a295cd746170937",
         "chalk": "^2.4.2",
         "express": "^4.17.1",
+        "http-proxy-middleware": "^0.19.1",
         "nunjucks": "^3.2.0",
         "serialport": "^7.1.5",
         "source-map-support": "^0.5.12"
