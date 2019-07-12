@@ -3,6 +3,7 @@ import * as fs from "fs";
 import * as path from "path";
 import * as express from "express";
 import * as proxy from "http-proxy-middleware";
+import { DevServerRequest } from "./dev_server";
 const chalk = require("chalk");
 chalk.enabled = true;
 chalk.level = 2;
@@ -43,6 +44,18 @@ function main() {
             ((server as any)[method] as any)(name, callback);
         }
     }
+
+    // Handle messages from the dev server.
+    process.on("message", (req: DevServerRequest) => {
+        switch (req.type) {
+        case "event":
+            const callback = (global as any).__eventEndpoints[req.name];
+            if (callback) {
+                callback(req.value);
+            }
+            break;
+        }
+    });
 
     server.listen(port, host);
 }

@@ -54,6 +54,7 @@ export class DevCommand extends Command {
     private httpAdapter!: HTTPAdapter;
     private board!: Board;
     private firmwareVersion!: number;
+    private devServer!: DevServer;
     private firmwareImage!: Buffer;
     private verifiedPong: boolean = false;
 
@@ -82,7 +83,7 @@ export class DevCommand extends Command {
         await this.initializeAdapter(opts.adapter, opts);
 
         logger.progress(`Starting a app...`);
-        const devServer = new DevServer(opts.host, opts.port, httpServerPort, opts.appDir);
+        this.devServer = new DevServer(opts.host, opts.port, httpServerPort, opts.appDir);
         logger.progress(`Listen on ${opts.host}:${opts.port}`);
 
         // Watch for the app source files.
@@ -90,7 +91,7 @@ export class DevCommand extends Command {
             const appFile = path.join(opts.appDir, "app.js");
             if (filename == "app.js" && fs.existsSync(appFile)) {
                 logger.progress("Change detected, restarting and rebuilding the app...");
-                devServer.restart();
+                this.devServer.restart();
                 await this.build(opts.appDir);
             }
         });
@@ -181,7 +182,25 @@ export class DevCommand extends Command {
 
         if (payload.log) {
             for (const line of payload.log.split("\n")) {
-                console.log("device log:", line);
+                const EVENT_REGEX = /^@(?<name>[^ ]+) (?<type>[bis]):(?<value>.*)$/;
+                const m = line.match(EVENT_REGEX);
+                if (m) {
+                    const { name, type, value: valueStr } = m.groups!;
+                    let value: any;
+                    switch (type) {
+                    case "b": value = (valueStr == "true"); break;
+                    case "i": value = parseInt(valueStr); break;
+                    case "s": value = valueStr; break;
+                    default:
+                        logger.warn(`unknown event type: \`${type}'`);
+                        continue;
+                    }
+
+                    console.log(`event: name=${name}, value=${value}`);
+                    this.devServer.sendRequest({ type: "event", name, value });
+                } else {
+                    console.log("device log:", line);
+                }
             }
         }
 

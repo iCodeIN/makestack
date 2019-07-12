@@ -23,3 +23,8 @@ export const http = {
         (global as any).__httpEndpoints["put"].push({ name, callback });
     },
 };
+
+(global as any).__eventEndpoints = {}
+export function onEvent(name: string, callback: (value: any) => void) {
+    (global as any).__eventEndpoints[name] = callback;
+}

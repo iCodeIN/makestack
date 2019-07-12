@@ -1,7 +1,11 @@
-const { server } = require("makestack");
+const { device, server } = require("makestack");
 
 server.http.get("/foo", (req, res) => {
     res.send("Hello from foo!\n\n");
+});
+
+server.onEvent("hello", (value) => {
+    console.log("received hello:", value);
 });
 
 device.onReady(() => {
@@ -9,9 +13,8 @@ device.onReady(() => {
     print("Hello World!");
     pinMode(22, "OUTPUT");
     while (1) {
-        digitalWrite(LED_PIN, "HIGH");
-        delay(100);
-        digitalWrite(LED_PIN, "LOW");
-        delay(100);
+        print("publishing...");
+        publish("hello", 17184321);
+        delay(1000);
     }
 });

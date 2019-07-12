@@ -1,6 +1,14 @@
 import * as path from "path";
 import * as child_process from "child_process";
 
+export interface DeviceEventMessage {
+    type: "event",
+    name: string,
+    value: any,
+}
+
+export type DevServerRequest = DeviceEventMessage;
+
 export class DevServer {
     private appDir: string;
     private host: string;
@@ -39,5 +47,9 @@ export class DevServer {
         })
 
         this.proc.kill();
+    }
+
+    public sendRequest(msg: DevServerRequest) {
+        this.proc.send(msg);
     }
 }

@@ -54,7 +54,30 @@ static Value api_onready(Context *ctx, int nargs, Value *args) {
 
 static Value api_print(Context *ctx, int nargs, Value *args) {
     std::string str = VM_GET_STRING_ARG(0);
-    VM_DEBUG("VM::print: %s", str.c_str());
+    vm_port_print("%s\n", str.c_str());
+    return Value::Undefined();
+}
+
+static Value api_publish(Context *ctx, int nargs, Value *args) {
+    std::string name = VM_GET_STRING_ARG(0);
+    Value value = VM_GET_ARG(1);
+
+    char type;
+    switch (value.type()) {
+    case ValueType::Bool:
+        type = 'b';
+        break;
+    case ValueType::Int:
+        type = 'i';
+        break;
+    case ValueType::String:
+        type = 's';
+    break;
+    default:
+        type = 'u';
+    }
+
+    vm_port_print("@%s %c:%s\n", name.c_str(), type, value.toString().c_str());
     return Value::Undefined();
 }
 
@@ -116,6 +139,7 @@ void run_app() {
     device_object.set(Value::String("onReady"), Value::Function(api_onready));
     app_vm->globals.set("device", device_object);
     app_vm->globals.set("print", Value::Function(api_print));
+    app_vm->globals.set("publish", Value::Function(api_publish));
     app_vm->globals.set("delay", Value::Function(api_delay));
     app_vm->globals.set("pinMode", Value::Function(api_pin_mode));
     app_vm->globals.set("digitalWrite", Value::Function(api_digital_write));
