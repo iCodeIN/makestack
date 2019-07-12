@@ -91,6 +91,13 @@ public:
 
     std::string toString() const {
         switch (type) {
+        case ValueType::Bool:
+            return v_b ? "true" : "false";
+        case ValueType::Int: {
+            char buf[32];
+            snprintf(buf, sizeof(buf), "%d", v_i);
+            return std::string(buf);
+        }
         case ValueType::String:
             return v_s;
         default:
