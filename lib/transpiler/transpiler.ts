@@ -179,16 +179,22 @@ export class Transpiler {
     }
 
     private visitTopLevel(node: t.Node) {
-        // TODO: require("makestack/device")
+        // TODO: verify require("makestack")
         // TODO: const variables in the top-level
+
+        const deviceContextCallbacks = [
+            "onReady",
+        ];
 
         // Device contexts.
         if (t.isCallExpression(node)
             && t.isMemberExpression(node.callee)
             && t.isIdentifier(node.callee.object)
             && t.isIdentifier(node.callee.property)
-            && node.callee.object.name == "device"
+            && node.callee.object.name == "app"
+            && deviceContextCallbacks.includes(node.callee.property.name)
         ) {
+            node.callee = t.identifier("__" + node.callee.property.name);
             this.setup += this.visitCallExpr(node) + `;`;
         }
     }

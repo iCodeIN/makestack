@@ -135,20 +135,22 @@ void run_app() {
     app_vm = new VM();
     app_ctx = app_vm->create_context();
 
+    app_vm->globals.set("__onReady", Value::Function(api_onready));
+
     Value device_object = Value::Object();
-    device_object.set(Value::String("onReady"), Value::Function(api_onready));
+    device_object.set(Value::String("print"), Value::Function(api_print));
+    device_object.set(Value::String("publish"), Value::Function(api_publish));
+    device_object.set(Value::String("delay"), Value::Function(api_delay));
+    device_object.set(Value::String("pinMode"), Value::Function(api_pin_mode));
+    device_object.set(Value::String("digitalWrite"), Value::Function(api_digital_write));
     app_vm->globals.set("device", device_object);
-    app_vm->globals.set("print", Value::Function(api_print));
-    app_vm->globals.set("publish", Value::Function(api_publish));
-    app_vm->globals.set("delay", Value::Function(api_delay));
-    app_vm->globals.set("pinMode", Value::Function(api_pin_mode));
-    app_vm->globals.set("digitalWrite", Value::Function(api_digital_write));
 
     INFO("Initializing the app...");
     app_setup(app_ctx);
 
     INFO("Entering the onready callback...");
     if (onready_callback) {
-        app_ctx->call(VM_CURRENT_LOC, onready_callback, 0, nullptr);
+        Value args[] = {device_object};
+        app_ctx->call(VM_CURRENT_LOC, onready_callback, 1, args);
     }
 }
