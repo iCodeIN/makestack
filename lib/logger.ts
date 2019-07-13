@@ -62,7 +62,8 @@ export class Logger {
     }
 
     public error(...messages: any[]) {
-        this.log(red.bold(join(messages)), true);
+        this.log(red.bold("Error: " + join(messages)), true);
+        process.exit(1);
     }
 
     public command(...messages: any[]) {
