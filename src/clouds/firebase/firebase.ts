@@ -66,7 +66,7 @@ export async function deploy(appDir: string, firmwarePath: string, opts: DeployO
 }
 
 async function pack(appDir: string, firmwarePath: string, opts: DeployOptions): Promise<string> {
-    const buildDir = createTmpDir();
+    const buildDir = createTmpDir("makestack-firebase-pack");
     const appFilePath = (relpath: string) =>  path.join(appDir, relpath);
     const buildFilePath = (relpath: string) =>  path.join(buildDir, relpath);
 
