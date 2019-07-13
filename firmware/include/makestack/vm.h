@@ -82,12 +82,33 @@ public:
 
 class ValueInner {
 public:
-    ValueInner(ValueType type) : type(type), ref_count(1), v_e(SourceLoc("", "", -1), "") {}
-    ~ValueInner() {
-        if (type != ValueType::Error) {
-            v_e.check();
+    ValueType type;
+    int ref_count = 1;
+    union {
+        NativeFunction v_f;
+        std::string v_s;
+        int v_i;
+        bool v_b;
+        ErrorInfo v_e;
+        std::unordered_map<std::string, ValueInner *> v_obj;
+    };
+
+    ValueInner(ValueType type) : type(type) {
+        if (type == ValueType::Object) {
+            new (&v_obj) std::unordered_map<std::string, ValueInner *>();
         }
     }
+
+    ValueInner(const char *str)
+        : type(ValueType::String), v_s(str) {}
+    ValueInner(int value)
+        : type(ValueType::Int), v_i(value) {}
+    ValueInner(bool value)
+        : type(ValueType::Bool), v_b(value) {}
+    ValueInner(NativeFunction value)
+        : type(ValueType::Function), v_f(value) {}
+    ValueInner(SourceLoc loc, const char *msg)
+        : type(ValueType::Error), v_e(loc, msg) {}
 
     std::string toString() const {
         switch (type) {
@@ -130,68 +151,65 @@ public:
         }
     }
 
-    ValueType type;
-    // The reference counter.
-    int ref_count;
-
-    // TODO: Use union.
-    NativeFunction v_f;
-    std::string v_s;
-    int v_i;
-    bool v_b;
-    ErrorInfo v_e;
-    std::unordered_map<std::string, ValueInner *> v_obj;
+    ~ValueInner() {
+        switch (type) {
+        case ValueType::Invalid:
+            VM_PANIC("tried to destruct invalid value");
+        case ValueType::Undefined:
+        case ValueType::Null:
+        case ValueType::Int:
+        case ValueType::Bool:
+        case ValueType::Function:
+            return;
+        case ValueType::String:
+            v_s.~basic_string();
+            break;
+        case ValueType::Object:
+            v_obj.~unordered_map();
+            break;
+        case ValueType::Error:
+            v_e.~ErrorInfo();
+            break;
+        }
+    }
 };
 
 class Value {
 public:
     static Value Undefined() {
-        Value value(ValueType::Undefined);
-        return value;
+        return Value(new ValueInner(ValueType::Undefined));
     }
 
     static Value Null() {
-        Value value(ValueType::Null);
-        return value;
+        return Value(new ValueInner(ValueType::Null));
     }
 
     static Value Bool(bool b) {
-        Value value(ValueType::Bool);
-        value.inner->v_b = b;
-        return value;
+        return Value(new ValueInner(b));
     }
 
     static Value Int(int i) {
-        Value value(ValueType::Int);
-        value.inner->v_i = i;
-        return value;
+        return Value(new ValueInner(i));
     }
 
     static Value String(const char *s) {
-        Value value(ValueType::String);
-        value.inner->v_s = s;
-        return value;
+        return Value(new ValueInner(s));
     }
 
     static Value Function(NativeFunction f) {
-        Value value(ValueType::Function);
-        value.inner->v_f = f;
-        return value;
+        return Value(new ValueInner(f));
     }
 
     static Value Object() {
-        Value value(ValueType::Object);
-        return value;
+        return Value(new ValueInner(ValueType::Object));
     }
 
     static Value Error(SourceLoc loc, const char *fmt, ...) {
-        Value value(ValueType::Error);
-        char buf[256];
         va_list vargs;
-
         va_start(vargs, fmt);
+        char buf[256];
         vsnprintf((char *) &buf, sizeof(buf), fmt, vargs);
-        value.inner->v_e = ErrorInfo(loc, std::string(buf));
+        Value value(new ValueInner(loc, buf));
         va_end(vargs);
         return value;
     }
@@ -243,12 +261,8 @@ public:
     }
 
 private:
-    Value(ValueType type) {
-        inner = new ValueInner(type);
-    }
-
-    Value(ValueInner *other) {
-        inner = other;
+    Value(ValueInner *value) {
+        inner = value;
     }
 
     ValueInner *inner;
