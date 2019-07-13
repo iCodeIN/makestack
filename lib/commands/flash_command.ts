@@ -11,7 +11,7 @@ import { logger } from "../logger";
 
 export class FlashCommand extends Command {
     public static command = "flash";
-    public static desc = "";
+    public static desc = "Install the firmware on a connected device.";
     public static args = [];
     public static opts = [
         ...BUILD_OPTS,

@@ -9,7 +9,7 @@ import { logger } from "../logger";
 
 export class BuildCommand extends Command {
     public static command = "build";
-    public static desc = "";
+    public static desc = "Build the firmware.";
     public static args = [];
     public static opts = [ ...BUILD_OPTS ];
     public static watchMode = true;

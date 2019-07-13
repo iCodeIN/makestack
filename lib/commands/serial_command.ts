@@ -27,7 +27,7 @@ function printLines(device: string, baudRate: number): Promise<void> {
 
 export class SerialCommand extends Command {
     public static command = "serial";
-    public static desc = "";
+    public static desc = "Read device log messages from the serial port.";
     public static args = [];
     public static opts = [
         ...DEVICE_FILE_OPTS,

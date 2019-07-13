@@ -12,7 +12,7 @@ import { DeployOptions } from "../clouds";
 
 export class DeployCommand extends Command {
     public static command = "deploy";
-    public static desc = "";
+    public static desc = "Deploy the app.";
     public static args = [];
     public static opts = [
         ...APP_OPTS,

@@ -20,7 +20,7 @@ import { ProtocolServer } from "../server/server";
 
 export class DevCommand extends Command {
     public static command = "dev";
-    public static desc = "";
+    public static desc = "Starts up the app with auto update.";
     public static args = [];
     public static opts = [
         ...APP_OPTS,

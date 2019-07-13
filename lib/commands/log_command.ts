@@ -11,7 +11,7 @@ import { DeployOptions } from "../clouds";
 
 export class LogCommand extends Command {
     public static command = "log";
-    public static desc = "";
+    public static desc = "Read logs from the deployed app.";
     public static args = [];
     public static opts = [
         ...APP_OPTS,

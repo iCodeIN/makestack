@@ -67,7 +67,7 @@ function scaffold(appDir: string) {
 
 export class NewCommand extends Command {
     public static command = "new";
-    public static desc = "";
+    public static desc = "Create a new app.";
     public static args = [
         {
             name: "path",
