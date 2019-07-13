@@ -12,6 +12,14 @@ jobs:
       addons:
         apt:
           packages:
+            - libncurses-dev
+            - flex
+            - bison
+            - python-serial
+            - python-cryptography
+            - python-future
+            - python-pyparsing
+            - python-pyelftools
 
     - os: osx
       osx_image: xcode11
