@@ -11,10 +11,10 @@
         "prepack": "npm run build",
         "build": "tsc",
         "dev": "tsc -w",
-        "lint": "eslint lib/**/*.ts",
-        "prettify": "prettier --write lib/**/*.ts",
-        "test": "jest --coverage lib",
-        "autotest": "jest --watch lib"
+        "lint": "eslint src/**/*.ts",
+        "prettify": "prettier --write src/**/*.ts",
+        "test": "jest --coverage src",
+        "autotest": "jest --watch src"
     },
     "bin": {
         "makestack": "makestack"
@@ -22,7 +22,7 @@
     "files": [
         "makestack",
         "dist",
-        "lib"
+        "src"
     ],
     "dependencies": {
         "@babel/traverse": "^7.5.0",
