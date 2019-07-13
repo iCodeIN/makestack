@@ -1,4 +1,4 @@
-# makestack
+# MakeStack
 
 > A minimalistic JavaScript IoT framework for rapid prototyping.
 
