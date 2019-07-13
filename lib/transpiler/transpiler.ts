@@ -4,22 +4,54 @@ import traverse, { NodePath } from "@babel/traverse";
 import * as t from "@babel/types";
 import { TranspileError, UnimplementedError } from ".";
 
+function isRequireCall(node: t.Expression | null, pkg: string) {
+    if (t.isCallExpression(node)
+        && t.isIdentifier(node.callee)
+        && node.callee.name == "require"
+        && node.arguments.length == 1
+    ) {
+        const arg = node.arguments[0]
+        return t.isStringLiteral(arg) && arg.value == pkg;
+    }
+
+    return false;
+}
+
+function isDeviceContextAPICall(apiVarName: string | null, node: t.Node): node is t.ExpressionStatement {
+    const deviceContextCallbacks = [
+        "onReady",
+    ];
+
+    return t.isExpressionStatement(node)
+        && t.isCallExpression(node.expression)
+        && t.isMemberExpression(node.expression.callee)
+        && !node.expression.callee.computed
+        && t.isIdentifier(node.expression.callee.object)
+        && t.isIdentifier(node.expression.callee.property)
+        && node.expression.callee.object.name == apiVarName
+        && deviceContextCallbacks.includes(node.expression.callee.property.name);
+    }
+
 export class Transpiler {
     private lambda: string = "";
     private setup: string = "";
+    private apiVarName: string | null = null;
     private funcNameStack: string[] = ["(top level)"];
 
     public transpile(code: string): string {
         const ast = parser.parse(code);
-        traverse(ast, this.traverser);
+        traverse(ast, {
+            Program: (path: NodePath) => {
+                if (path.isProgram(path.node)) {
+                    for (const stmt of path.node.body) {
+                        this.visitTopLevel(stmt);
+                    }
+                }
+            }
+        });
+
         return this.lambda + "\n\nvoid app_setup(Context *__ctx) {\n" + this.setup + "}\n";
     }
-
-    private traverser = {
-        enter: (path: NodePath) => {
-            this.visitTopLevel(path.node);
-        }
-    };
 
     private getCurrentFuncName(): string {
         const name = this.funcNameStack[this.funcNameStack.length - 1];
@@ -178,24 +210,27 @@ export class Transpiler {
         }
     }
 
-    private visitTopLevel(node: t.Node) {
-        // TODO: verify require("makestack")
-        // TODO: const variables in the top-level
+    private visitTopLevel(node: t.Statement) {
+        // TODO: Support const variables in the top-level.
 
-        const deviceContextCallbacks = [
-            "onReady",
-        ];
+        // Parse `const apiVarName = require("makestack")` and save the declared
+        // identifier in apiVarName.
+        if (t.isVariableDeclaration(node)) {
+            for (const decl of node.declarations) {
+                if (t.isIdentifier(decl.id) && isRequireCall(decl.init, "makestack")) {
+                    this.apiVarName = decl.id.name;
+                }
+            }
+        }
 
-        // Device contexts.
-        if (t.isCallExpression(node)
-            && t.isMemberExpression(node.callee)
-            && t.isIdentifier(node.callee.object)
-            && t.isIdentifier(node.callee.property)
-            && node.callee.object.name == "app"
-            && deviceContextCallbacks.includes(node.callee.property.name)
-        ) {
-            node.callee = t.identifier("__" + node.callee.property.name);
-            this.setup += this.visitCallExpr(node) + `;`;
+        // API calls which registers device-side callbacks. Call
+        // t.isMemberExpression() again because tsc does not infer the type.
+        if (isDeviceContextAPICall(this.apiVarName, node)
+            && t.isCallExpression(node.expression)
+            && t.isMemberExpression(node.expression.callee)) {
+            // app.onReady(...) => __onReady(...)
+            node.expression.callee = t.identifier("__" + node.expression.callee.property.name);
+            this.setup += this.visitCallExpr(node.expression) + `;`;
         }
     }
 }
