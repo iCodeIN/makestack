@@ -88,12 +88,13 @@ public:
 };
 
 void connect_wifi() {
-    INFO("Connecting to '%s'...", __cred.wifi_ssid);
+    INFO("[wifi_adapter] Connecting to '%s'...", __cred.wifi_ssid);
     WiFi.begin(__cred.wifi_ssid, __cred.wifi_password);
 
-    int timeout = 10;
+    int timeout = 30;
     while (timeout > 0 && WiFi.status() != WL_CONNECTED) {
-        delay(1000);
+        printf(".");
+        delay(500);
         timeout--;
     }
 
@@ -102,7 +103,7 @@ void connect_wifi() {
         vTaskDelete(NULL);
     }
 
-    INFO("connected to Wi-Fi");
+    INFO("[wifi_adapter] connected to Wi-Fi");
 }
 
 #define TX_PAYLOAD_MAX_LEN 2048
@@ -159,13 +160,17 @@ void send_and_receive_payload(String &url) {
 }
 
 void wifi_adapter_task() {
-    INFO("[Makestack] wifi_adapter: starting");
-    connect_wifi();
-
     String url = __cred.server_url;
     url += "/makestack/protocol";
     while (1) {
         send_and_receive_payload(url);
         vTaskDelay(1000 / portTICK_PERIOD_MS);
     }
+}
+
+void start_wifi_adapter() {
+    INFO("[wifi_adapter] starting");
+    connect_wifi();
+
+    xTaskCreate((TaskFunction_t) &wifi_adapter_task, "wifi_adapter_task", 8192 * 2, NULL, 10, NULL);
 }

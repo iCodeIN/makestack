@@ -23,7 +23,7 @@ void supervisor_main() {
         xTaskCreate((TaskFunction_t) &serial_adapter_task, "serial_adapter_task", 8192 * 4, NULL, 10, NULL);
     }
     if (!strcmp(__cred.adapter, "wifi")) {
-        xTaskCreate((TaskFunction_t) &wifi_adapter_task, "wifi_adapter_task", 8192 * 2, NULL, 10, NULL);
+        start_wifi_adapter();
     }
 
     // FIXME: Wait for init_serial to finish initializing the serial port.
