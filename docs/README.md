@@ -1,4 +1,5 @@
 # MakeStack
+[![Build Status](https://travis-ci.com/seiyanuta/makestack.svg?branch=master)](https://travis-ci.com/seiyanuta/makestack)
 
 > A minimalistic JavaScript IoT framework for rapid prototyping.
 
