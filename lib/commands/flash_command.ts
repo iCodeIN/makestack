@@ -20,6 +20,8 @@ export class FlashCommand extends Command {
 
     public async run(_args: Args, opts: Opts) {
         const board: Board = opts.board;
+
+        logger.progress("Building the firmware...");
         await buildApp(board, opts.appDir);
 
         logger.progress("Flashing...");

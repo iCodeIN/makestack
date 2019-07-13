@@ -15,6 +15,7 @@ export class BuildCommand extends Command {
     public static watchMode = true;
 
     public async run(_args: Args, opts: Opts) {
+        logger.progress("Building the firmware...");
         await buildApp(opts.board, opts.appDir);
         logger.success("Done");
     }

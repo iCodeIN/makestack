@@ -34,9 +34,7 @@ export async function buildApp(board: Board, appDir: string) {
     const appFile = path.join(appDir, "app.js");
     const appJs = fs.readFileSync(appFile, "utf-8");
     const transpiler = new Transpiler();
-    logger.progress(`Transpiling ${appFile}`);
     const code = transpiler.transpile(appJs);
     const appCxx = render(APP_CXX_TEMPLATE, { code });
-    logger.progress("Building the firmware...");
     await board.buildFirmware(appDir, appCxx);
 }

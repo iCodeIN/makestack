@@ -94,6 +94,7 @@ export class DevCommand extends Command {
     }
 
     private async build(appDir: string) {
+        logger.progress("Building the firmware...");
         try {
             await buildApp(this.board, appDir);
         } catch (e) {

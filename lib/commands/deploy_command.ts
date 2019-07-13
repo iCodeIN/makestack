@@ -40,6 +40,7 @@ export class DeployCommand extends Command {
     ];
 
     public async run(args: Args, opts: Opts) {
+        logger.progress("Building the firmware...");
         await buildApp(opts.board, opts.appDir);
         await opts.cloud.deploy(
             opts.appDir,
