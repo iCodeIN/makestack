@@ -45,7 +45,6 @@ static int encode_leb128(uint8_t *buf, size_t buf_len, uint32_t value) {
             return 0;
         }
 
-        DEBUG("value=%u", value);
         uint8_t msb = (value >= 0x80) ? 0x80 : 0;
         buf[i] = msb | (value & 0x7f);
         i++;
