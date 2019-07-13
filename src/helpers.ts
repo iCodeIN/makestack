@@ -1,4 +1,5 @@
 import * as path from "path";
+import * as tmp from "tmp";
 import * as nunjucks from "nunjucks";
 import { spawnSync, SpawnSyncOptions } from "child_process";
 
@@ -54,4 +55,8 @@ export function bytesToReadableString(bytes: number): string {
 export function render(template: string, ctx: { [name: string]: string }) {
     nunjucks.configure({ autoescape: false });
     return nunjucks.renderString(template, ctx);
+}
+
+export function createTmpDir(prefix: string): string {
+    return tmp.dirSync({ prefix }).name;
 }

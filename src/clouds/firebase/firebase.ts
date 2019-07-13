@@ -1,8 +1,7 @@
 import * as fs from "fs-extra";
 import * as path from "path";
-import * as tmp from "tmp";
 import { DeployOptions } from "..";
-import { exec } from "../../helpers";
+import { exec, createTmpDir } from "../../helpers";
 import { logger } from "../../logger";
 
 function copyFile(dst: string, src: string) {
@@ -67,8 +66,7 @@ export async function deploy(appDir: string, firmwarePath: string, opts: DeployO
 }
 
 async function pack(appDir: string, firmwarePath: string, opts: DeployOptions): Promise<string> {
-    const buildDirObj = tmp.dirSync();
-    const buildDir = buildDirObj.name;
+    const buildDir = createTmpDir();
     const appFilePath = (relpath: string) =>  path.join(appDir, relpath);
     const buildFilePath = (relpath: string) =>  path.join(buildDir, relpath);
 

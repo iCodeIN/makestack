@@ -1,7 +1,7 @@
 import { spawn, spawnSync } from "child_process";
 import * as os from "os";
 import * as path from "path";
-import { resolveRepoPath, exec } from "../helpers";
+import { resolveRepoPath, exec, createTmpDir } from "../helpers";
 import * as fs from "fs";
 import { BuildError, BuildOptions } from ".";
 import { logger } from "../logger";
@@ -62,8 +62,7 @@ async function installDependencies(firmwareDir: string) {
     }
 
     logger.progress("Downloading dependencies...");
-    const tmpDir = path.resolve(os.tmpdir(), "makestack-esp32-deps");
-    fs.mkdirSync(tmpDir);
+    const tmpDir = createTmpDir("makestack-esp32-deps");
 
     // Download and extract the ESP32 toolchain.
     let osName;
