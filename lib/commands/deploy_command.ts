@@ -2,9 +2,9 @@ import {
     Args,
     Command,
     Opts,
-    validateAppDir,
-    validateBoardType,
-    validateCloudType,
+    CLOUD_OPTS,
+    BOARD_OPTS,
+    APP_OPTS,
 } from "./command";
 import { buildApp } from "../firmware";
 import { logger } from "../logger";
@@ -15,28 +15,9 @@ export class DeployCommand extends Command {
     public static desc = "";
     public static args = [];
     public static opts = [
-        {
-            name: "--app-dir <path>",
-            desc: "The app directory.",
-            default: process.cwd(),
-            validator: validateAppDir,
-        },
-        {
-            name: "--board <board>",
-            desc: "The board type (only 'esp32' for now).",
-            default: "esp32",
-            validator: validateBoardType,
-        },
-        {
-            name: "--cloud <cloud>",
-            desc: "The cloud (only 'firebase' for now).",
-            default: "firebase",
-            validator: validateCloudType,
-        },
-        {
-            name: "--firebase-project <name>",
-            desc: "The Firebase project name.",
-        },
+        ...APP_OPTS,
+        ...BOARD_OPTS,
+        ...CLOUD_OPTS
     ];
 
     public async run(args: Args, opts: Opts) {

@@ -148,3 +148,16 @@ export const WATCH_OPTS = [
         default: false,
     }
 ]
+
+export const CLOUD_OPTS = [
+    {
+        name: "--cloud <cloud>",
+        desc: "The cloud (only 'firebase' for now).",
+        default: "firebase",
+        validator: validateCloudType,
+    },
+    {
+        name: "--firebase-project <name>",
+        desc: "The Firebase project name.",
+    },
+]

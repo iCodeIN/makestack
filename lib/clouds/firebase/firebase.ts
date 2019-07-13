@@ -108,3 +108,7 @@ async function pack(appDir: string, firmwarePath: string, opts: DeployOptions): 
     exec(["yarn", "install"], { cwd: buildFilePath("functions") });
     return buildDir;
 }
+
+export function log(appDir: string, opts: DeployOptions) {
+    exec(["firebase" , "functions:log", "--project", opts.firebaseProject]);
+}

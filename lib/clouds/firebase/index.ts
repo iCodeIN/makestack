@@ -1,3 +1,3 @@
-import { deploy } from "./firebase";
+import { deploy, log } from "./firebase";
 
-export { deploy };
+export { deploy, log };
