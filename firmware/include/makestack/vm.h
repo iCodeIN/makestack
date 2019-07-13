@@ -297,20 +297,20 @@ public:
     Value call(SourceLoc called_from, Value func, int nargs, Value *args);
 };
 
-// Saves the callee scope, enter the closure scope, and restore the callee
+// Saves the caller scope, enter the closure scope, and restore the caller
 // one when this object is destructed, i.e., returned from the closure.
 class Closure {
 private:
     Context *ctx;
-    Scope *callee;
+    Scope *caller;
 
 public:
-    Closure(Context *ctx, Scope *closure) : ctx(ctx), callee(ctx->current) {
+    Closure(Context *ctx, Scope *closure) : ctx(ctx), caller(ctx->current) {
         ctx->current = closure;
     }
 
     ~Closure() {
-        ctx->current = callee;
+        ctx->current = caller;
     }
 };
 
