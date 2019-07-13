@@ -1,6 +1,6 @@
 import * as fs from "fs";
 import * as path from "path";
-import { Board } from "./boards";
+import { Board, BuildOptions } from "./boards";
 import { Transpiler } from "./transpiler";
 import { logger } from "./logger";
 import { render } from "./helpers";
@@ -29,12 +29,14 @@ const APP_CXX_TEMPLATE = `\
 {{ code }}
 `
 
-// Returns true on succcess.
-export async function buildApp(board: Board, appDir: string) {
+export function transpileApp(appDir: string): string {
     const appFile = path.join(appDir, "app.js");
     const appJs = fs.readFileSync(appFile, "utf-8");
     const transpiler = new Transpiler();
     const code = transpiler.transpile(appJs);
-    const appCxx = render(APP_CXX_TEMPLATE, { code });
-    await board.buildFirmware(appDir, appCxx);
+    return render(APP_CXX_TEMPLATE, { code });
+}
+
+export async function buildApp(board: Board, appDir: string, opts: BuildOptions) {
+    await board.buildFirmware(appDir, transpileApp(appDir), opts);
 }

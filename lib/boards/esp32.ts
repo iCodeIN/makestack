@@ -3,7 +3,7 @@ import * as os from "os";
 import * as path from "path";
 import { resolveRepoPath, exec } from "../helpers";
 import * as fs from "fs";
-import { BuildError } from ".";
+import { BuildError, BuildOptions } from ".";
 import { logger } from "../logger";
 import { Spinner } from "../spinner";
 import * as assert from "assert";
@@ -11,19 +11,19 @@ import * as assert from "assert";
 export function getFirmwarePath(): string {
     return resolveRepoPath("firmware/build/esp32/firmware.bin");
 }
-export async function flashFirmware(devicePath: string, firmwarePath: string) {
-    // TODO: Use firmwarePath!
-    assert.equal(
-        firmwarePath,
-        resolveRepoPath("firmware/build/esp32/firmware.bin")
-    );
-
-    exec(["/usr/bin/make", "BOARD=esp32", "ESPPORT=" + devicePath, "flash"], {
+export async function flashFirmware(appDir: string, appCxx: string, devicePath: string, opts: BuildOptions) {
+    await buildFirmware(appDir, appCxx, opts);
+    exec(["/usr/bin/make", "flash"], {
         cwd: resolveRepoPath("firmware"),
+        env: {
+            BOARD: "esp32",
+            PATH: process.env.PATH,
+            ESPPORT: devicePath,
+        }
     });
 }
 
-export async function buildFirmware(appDir: string, appCxx: string) {
+export async function buildFirmware(appDir: string, appCxx: string, opts: BuildOptions) {
     const buildLogPath = path.join(appDir, "build.log");
     const firmwareDir = resolveRepoPath("firmware");
     const buildDir = path.join(firmwareDir, "build/esp32");
@@ -37,7 +37,7 @@ export async function buildFirmware(appDir: string, appCxx: string) {
     fs.writeFileSync(path.join(componentDir, "component.mk"), componentMk);
     fs.writeFileSync(path.join(componentDir, "app.cpp"), appCxx);
 
-    await make(firmwareDir, componentDir, buildLogPath);
+    await make(firmwareDir, componentDir, buildLogPath, opts);
 }
 
 const TOOLCHAIN_VERSION = "1.22.0-80-g6c4433a-5.2.0";
@@ -102,19 +102,23 @@ async function installDependencies(firmwareDir: string) {
     logger.success("Successfully downloaded dependencies");
 }
 
-function make(firmwareDir: string, componentDir: string, buildLogPath: string) {
+function make(firmwareDir: string, componentDir: string, buildLogPath: string, opts: BuildOptions) {
     return new Promise((resolve, reject) => {
         const makePath = "/usr/bin/make";
         const procs = os.cpus().length;
         const cp = spawn(makePath, [`-j${procs}`, "build"], {
             cwd: firmwareDir,
             stdio: "pipe",
-            env: Object.assign({}, process.env, {
+            env: {
                 BOARD: "esp32",
                 PATH: process.env.PATH,
                 MY_COMPONENT_DIRS: componentDir,
                 MAKESTACK_APP: "1",
-            }),
+                ADAPTER: opts.adapter,
+                WIFI_SSID: opts.wifiSsid || "",
+                WIFI_PASSWORD: opts.wifiPassword || "",
+                SERVER_URL: opts.serverUrl || "",
+            }
         });
 
         let stdout = "";

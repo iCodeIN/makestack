@@ -11,7 +11,7 @@ import {
     ADAPTER_OPTS,
     validateDeviceFilePath,
 } from "./command";
-import { Board, BuildError } from "../boards";
+import { Board, BuildError, BuildOptions } from "../boards";
 import { logger } from "../logger";
 import { buildApp } from "../firmware";
 import { SerialAdapter, HTTPAdapter } from "../adapters";
@@ -58,7 +58,7 @@ export class DevCommand extends Command {
 
         // First, build the firmware. We need the firmware file in order to send
         // the latest version info in a heartbeat.
-        if (!(await this.build(opts.appDir))) {
+        if (!(await this.build(opts.appDir, opts as BuildOptions))) {
             logger.error("fix build errors and run the command again");
             process.exit(1);
         }
@@ -84,7 +84,7 @@ export class DevCommand extends Command {
             if (filename == "app.js" && fs.existsSync(appFile)) {
                 logger.progress("Change detected, restarting and rebuilding the app...");
                 this.devServer.restart();
-                await this.build(opts.appDir);
+                await this.build(opts.appDir, opts as BuildOptions);
             }
         });
 
@@ -93,10 +93,10 @@ export class DevCommand extends Command {
         );
     }
 
-    private async build(appDir: string) {
+    private async build(appDir: string, opts: BuildOptions) {
         logger.progress("Building the firmware...");
         try {
-            await buildApp(this.board, appDir);
+            await buildApp(this.board, appDir, opts);
         } catch (e) {
             if (e instanceof BuildError) {
                 logger.error("failed to build");

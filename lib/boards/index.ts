@@ -1,8 +1,15 @@
 import * as esp32 from "./esp32";
 
+export interface BuildOptions {
+    adapter: string,
+    wifiSsid?: string,
+    wifiPassword?: string,
+    serverUrl?: string,
+};
+
 export interface Board {
-    flashFirmware: (devicePath: string, firmwarePath: string) => Promise<void>;
-    buildFirmware: (appDir: string, appCxx: string) => Promise<void>;
+    flashFirmware: (appDir: string, appCxx: string, devicePath: string, opts: BuildOptions) => Promise<void>;
+    buildFirmware: (appDir: string, appCxx: string, opts: BuildOptions) => Promise<void>;
     getFirmwarePath: () => string;
 }
 

@@ -139,7 +139,7 @@ export const DEVICE_FILE_OPTS = [
     },
 ];
 
-export const BUILD_OPTS = [...APP_OPTS, ...BOARD_OPTS];
+export const BUILD_OPTS = [...APP_OPTS, ...ADAPTER_OPTS, ...BOARD_OPTS];
 
 export const WATCH_OPTS = [
     {

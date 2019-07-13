@@ -6,6 +6,7 @@ import {
 } from "./command";
 import { buildApp } from "../firmware";
 import { logger } from "../logger";
+import { BuildOptions } from "../boards";
 
 export class BuildCommand extends Command {
     public static command = "build";
@@ -16,7 +17,7 @@ export class BuildCommand extends Command {
 
     public async run(_args: Args, opts: Opts) {
         logger.progress("Building the firmware...");
-        await buildApp(opts.board, opts.appDir);
+        await buildApp(opts.board, opts.appDir, opts as BuildOptions);
         logger.success("Done");
     }
 }
