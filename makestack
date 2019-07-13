@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 require("source-map-support").install();
 
-const { main } = require(".");
+const main = require("./dist/main");
 const chalk = require("chalk");
 
 process.on("unhandledRejection", (error) => {

@@ -1,8 +1,2 @@
-import * as main from "./main";
-import { device, server } from "./api";
-
-export {
-    main,
-    device,
-    server,
-};
+import * as api from "./api";
+module.exports = api;
