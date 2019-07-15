@@ -1,21 +1,13 @@
 const app = require("makestack");
 
-app.get("/foo", (req, res) => {
-    res.send("Hello from foo!\n\n");
-});
-
-app.onEvent("hello", (value) => {
-    console.log("received hello:", value);
-});
-
 app.onReady((device) => {
     const LED_PIN = 22;
-    device.print("Hello World!");
-    device.pinMode(22, "OUTPUT");
-    device.digitalWrite(LED_PIN, "HIGH");
+    device.pinMode(LED_PIN, "OUTPUT");
     while (1) {
-        device.print("publishing...");
-        device.publish("hello", 17184321);
+        device.print("Blinking!");
+        device.digitalWrite(LED_PIN, "HIGH");
+        device.delay(1000);
+        device.digitalWrite(LED_PIN, "LOW");
         device.delay(1000);
     }
 });
