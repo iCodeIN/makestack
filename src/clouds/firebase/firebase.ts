@@ -83,10 +83,11 @@ async function pack(appDir: string, firmwarePath: string, opts: DeployOptions): 
     }
 
     const packageJson = FUNCTIONS_PACKAGE_JSON;
+    const appDependencies = fs.readJsonSync(appFilePath("package.json")).dependencies;
     const makestackDpendencies = fs.readJsonSync(
         path.resolve(__dirname, "../../../package.json")).dependencies;
     packageJson.dependencies = Object.assign({},
-        makestackDpendencies, packageJson.dependencies);
+        makestackDpendencies, packageJson.dependencies, appDependencies);
 
     const indexJs = fs.readFileSync(path.join(__dirname, "start.js"), "utf-8");
     mkdir(buildFilePath("functions"));
