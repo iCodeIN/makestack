@@ -33,6 +33,31 @@ void vm_port_debug(const char *fmt, ...);
         }                                                                  \
     } while (0)
 
+
+#define VM_NULL Value::Null()
+#define VM_UNDEF Value::Undefined()
+#define VM_STR(value) Value::String(value)
+#define VM_BOOL(value) Value::Bool(value)
+#define VM_INT(value) Value::Int(value)
+#define VM_FUNC(name, closure) ({ closure = __ctx->create_closure_scope(); Value::Function(name); })
+#define VM_FUNC_DEF(name, closure)                                           \
+        Scope *closure = nullptr;                                            \
+        static Value name(Context *__ctx, int __nargs, Value *__args) {      \
+            Closure __closure(__ctx, closure);
+#define VM_FUNC_DEF_END }
+#define VM_ANON_LOC(line) VM_APP_LOC("(anonymous function)", line)
+#define VM_APP_LOC(func, line) SourceLoc("app.js", func, line)
+#define VM_SET(id, value) __ctx->current->set(id, value)
+#define VM_GET(id) __ctx->current->get(id)
+#define VM_MGET(obj, prop) ({ Value __obj = obj; __obj.get(prop); })
+#define VM_CALL(loc, callee, nargs, ...)                         \
+        ({                                                       \
+            Value __tmp_args[] = { __VA_ARGS__ };                \
+            Value __callee = callee;                             \
+            __ctx->call(loc, __callee, nargs, __tmp_args);       \
+        })
+
+
 enum class ValueType {
     Invalid = 0, /* We never use it. */
     Undefined = 1,

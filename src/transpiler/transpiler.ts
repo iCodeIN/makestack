@@ -74,7 +74,7 @@ export class Transpiler {
 
     private visitFunctionBody(stmt: t.BlockStatement): string {
         const stmts = stmt.body.map(stmt => this.visitStmt(stmt));
-        return `{\n${stmts.join(";\n")};\nreturn Value::Undefined();\n}`;
+        return `{\n${stmts.join(";\n")};\nreturn VM_UNDEF;\n}`;
     }
 
     private visitExprStmt(stmt: t.ExpressionStatement): string {
@@ -86,11 +86,11 @@ export class Transpiler {
         if (decl.init) {
             init = this.visitExpr(decl.init);
         } else {
-            init = "Value::Undefined()";
+            init = "VM_UNDEF";
         }
 
         const id = this.getNameFromVarDeclId(decl.id);
-        return `__ctx->current->set("${id}", ${init})`;
+        return `VM_SET("${id}", ${init})`;
     }
 
     private visitVarDeclStmt(stmt: t.VariableDeclaration): string {
@@ -128,21 +128,22 @@ export class Transpiler {
         const callee = this.visitExpr(expr.callee);
         const func = this.getCurrentFuncName();
         const line = (expr.loc) ? expr.loc.start.line : -1;
-        const loc = `SourceLoc("app.js", "${func}", ${line})`;
         const args = expr.arguments.map(arg => this.visitExpr(arg));
-        const nargs = args.length;
-        return `({` +
-                    `Value __tmp_args[] = { ${args.join(", ")} };` +
-                    `Value __callee = ${callee};` +
-                    `__ctx->call(${loc}, __callee, ${nargs}, __tmp_args);` +
-                `})`;
+        const callArgs = [
+            (func == "(anonymous function)") ? `VM_ANON_LOC(${line})` : `VM_APP_LOC("${func}", ${line})`,
+            callee,
+            args.length,
+            ...args
+        ];
+
+        return `VM_CALL(${callArgs.join(", ")})`;
     }
 
     private lambdaId: number = 0;
     private visitArrowFuncExpr(func: t.ArrowFunctionExpression): string {
         const uniqueId = this.lambdaId;
-        const name = `__lambda_${uniqueId}`;
-        const closure = `__closure_${uniqueId}`;
+        const lambdaName = `__lambda_${uniqueId}`;
+        const closureName = `__closure_${uniqueId}`;
         this.lambdaId++;
 
         this.funcNameStack.push("(anonymous function)");
@@ -154,10 +155,8 @@ export class Transpiler {
         }
         this.funcNameStack.pop();
 
-        this.lambda += `Scope *${closure} = nullptr;\n`;
-        this.lambda += `static Value ${name}(Context *__ctx, int __nargs, Value *__args)`
-            + `\n{  Closure __closure(__ctx, ${closure}); ${body} }\n\n`;
-        return `({ ${closure} = __ctx->create_closure_scope(); Value::Function(${name}); })`;
+        this.lambda += `VM_FUNC_DEF(${lambdaName}, ${closureName})\n${body}\nVM_FUNC_DEF_END\n\n`;
+        return `VM_FUNC(${lambdaName}, ${closureName})`;
     }
 
     private visitNumberLit(expr: t.NumericLiteral): string {
@@ -165,16 +164,16 @@ export class Transpiler {
             throw new TranspileError(expr, "non-integer number is not yet supported");
         }
 
-        return `Value::Int(${expr.value})`;
+        return `VM_INT(${expr.value})`;
     }
 
     private visitStringLit(expr: t.StringLiteral): string {
         // TODO: escape sequences
-        return `Value::String("${expr.value}")`;
+        return `VM_STR("${expr.value}")`;
     }
 
     private visitIdentExpr(expr: t.Identifier): string {
-        return `__ctx->current->get("${expr.name}")`;
+        return `VM_GET("${expr.name}")`;
     }
 
     private visitMemberExpr(expr: t.MemberExpression): string {
@@ -186,10 +185,10 @@ export class Transpiler {
             if (!t.isIdentifier(expr.property)) {
                 throw new Error("expected identifier");
             }
-            prop = `Value::String("${expr.property.name}")`;
+            prop = `VM_STR("${expr.property.name}")`;
         }
 
-        return `({ Value __obj = ${obj}; __obj.get(${prop}); })`;
+        return `VM_MGET(${obj}, ${prop})`
     }
 
     private visitExpr(expr: t.Node): string {
