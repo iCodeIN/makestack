@@ -120,6 +120,14 @@ static Value api_digital_write(Context *ctx, int nargs, Value *args) {
     return Value::Undefined();
 }
 
+static Value api_analog_read(Context *ctx, int nargs, Value *args) {
+    int pin = VM_GET_INT_ARG(0);
+
+    VM_DEBUG("analogRead: %d %d", pin);
+    int value = analogRead(pin);
+    return Value::Int(value);
+}
+
 #ifdef MAKESTACK_APP
 extern void app_setup(Context *ctx);
 #else
@@ -143,6 +151,7 @@ void run_app() {
     device_object.set(Value::String("delay"), Value::Function(api_delay));
     device_object.set(Value::String("pinMode"), Value::Function(api_pin_mode));
     device_object.set(Value::String("digitalWrite"), Value::Function(api_digital_write));
+    device_object.set(Value::String("analogRead"), Value::Function(api_analog_read));
     app_vm->globals.set("device", device_object);
 
     INFO("Initializing the app...");
