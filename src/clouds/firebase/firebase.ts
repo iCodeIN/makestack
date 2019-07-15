@@ -47,7 +47,6 @@ const FUNCTIONS_PACKAGE_JSON = {
 }
 
 const EXTRA_FIREBASE_FILES = [
-    "firebase.json",
     "firestore.rules",
     "firestore.indexes.json",
 ]
@@ -70,6 +69,7 @@ async function pack(appDir: string, firmwarePath: string, opts: DeployOptions): 
     const appFilePath = (relpath: string) =>  path.join(appDir, relpath);
     const buildFilePath = (relpath: string) =>  path.join(buildDir, relpath);
 
+    copyFile(buildFilePath("firebase.json"), appFilePath("firebase.json"));
     for (const filename of EXTRA_FIREBASE_FILES) {
         copyFileIfExists(buildFilePath(filename), appFilePath(filename));
     }
