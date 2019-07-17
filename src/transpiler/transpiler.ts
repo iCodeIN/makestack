@@ -255,6 +255,17 @@ export class Transpiler {
         return expr.prefix ? (expr.operator + arg) : (arg + expr.operator);
     }
 
+    private visitLogicalExpr(expr: t.LogicalExpression): string {
+        const SUPPORTED_OPS: string[] = [ "||", "&&" ];
+        if (!SUPPORTED_OPS.includes(expr.operator)) {
+            throw new TranspileError(expr, `\`${expr.operator}' operator is not yet supported.`);
+        }
+
+        const left = this.visitExpr(expr.left);
+        const right = this.visitExpr(expr.right);
+        return `((${left}) ${expr.operator} (${right}))`;
+    }
+
     private visitUnaryExpr(expr: t.UnaryExpression): string {
         const SUPPORTED_OPS: string[] = [
             "!"
@@ -323,6 +334,8 @@ export class Transpiler {
             return this.visitUnaryExpr(expr);
         } else if (t.isBinaryExpression(expr)) {
             return this.visitBinaryExpr(expr);
+        } else if (t.isLogicalExpression(expr)) {
+            return this.visitLogicalExpr(expr);
         } else if (t.isUpdateExpression(expr)) {
             return this.visitUpdateExpr(expr);
         } else if (t.isAssignmentExpression(expr)) {
