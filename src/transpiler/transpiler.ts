@@ -194,6 +194,10 @@ export class Transpiler {
         return `VM_INT(${expr.value})`;
     }
 
+    private visitBooleanLit(expr: t.BooleanLiteral): string {
+        return `VM_BOOL(${expr.value ? 'true' : 'false'})`;
+    }
+
     private visitStringLit(expr: t.StringLiteral): string {
         // TODO: escape sequences
         return `VM_STR("${expr.value}")`;
@@ -263,6 +267,8 @@ export class Transpiler {
     private visitExpr(expr: t.Node): string {
         if (t.isNumericLiteral(expr)) {
             return this.visitNumberLit(expr);
+        } else if (t.isBooleanLiteral(expr)) {
+            return this.visitBooleanLit(expr);
         } else if (t.isStringLiteral(expr)) {
             return this.visitStringLit(expr);
         } else if (t.isIdentifier(expr)) {
