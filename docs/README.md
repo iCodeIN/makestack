@@ -40,10 +40,10 @@ app.onReady((device) => {
 ## Features
 - **Single-file server-side/device-side programming in modern JavaScript** powered by the [JavaScript to C++ transpiler](transpiler).
 - **Simplified development workflow:** just remember `flash`, `dev`, and `deploy` command.
-- **No user registration required:** deploy everything to Firebase with just one command.
+- **No user registration required:** deploy everything to your Firebase with just one command.
 - **Intuitive JavaScript API.**
-- **remote deivce firmware update.**
-- **remote device log collection.**
+- **Remote deivce firmware update.**
+- **Remote device log collection.**
 
 ## Examples
 - [Example apps in the repository](https://github.com/seiyanuta/makestack/tree/master/examples).
