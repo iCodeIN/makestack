@@ -11,9 +11,23 @@ import * as assert from "assert";
 export function getFirmwarePath(): string {
     return resolveRepoPath("firmware/build/esp32/firmware.bin");
 }
+
+function getGnuMakePath(): string {
+    if (os.platform() == "darwin") {
+        // The preinstalled make is BSD one. Try to locate the GNU make.
+        if (fs.existsSync("/usr/local/opt/make/libexec/gnubin/make")) {
+            return "/usr/local/opt/make/libexec/gnubin/make";
+        } else {
+            logger.warn("Install GNU make by `brew install make`.");
+        }
+    }
+
+    return "/usr/bin/make";
+}
+
 export async function flashFirmware(appDir: string, appCxx: string, devicePath: string, opts: BuildOptions) {
     await buildFirmware(appDir, appCxx, opts);
-    exec(["/usr/bin/make", "flash"], {
+    exec([getGnuMakePath(), "flash"], {
         cwd: resolveRepoPath("firmware"),
         env: {
             BOARD: "esp32",
@@ -104,7 +118,7 @@ async function installDependencies(firmwareDir: string) {
 
 function make(firmwareDir: string, componentDir: string, buildLogPath: string, opts: BuildOptions) {
     return new Promise((resolve, reject) => {
-        const makePath = "/usr/bin/make";
+        const makePath = getGnuMakePath();
         const procs = os.cpus().length;
         const cp = spawn(makePath, [`-j${procs}`, "build"], {
             cwd: firmwareDir,
