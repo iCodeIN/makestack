@@ -181,6 +181,9 @@ public:
     ValueInner *sub(const ValueInner& rhs);
     ValueInner *mul(const ValueInner& rhs);
     ValueInner *div(const ValueInner& rhs);
+    bool eq(const ValueInner& rhs);
+    bool gt(const ValueInner& rhs);
+    bool lt(const ValueInner& rhs);
     void self_add(const ValueInner& rhs);
     void self_sub(const ValueInner& rhs);
     void self_mul(const ValueInner& rhs);
@@ -285,6 +288,12 @@ public:
     Value operator-(const Value& rhs) { return Value(inner->sub(*rhs.inner)); }
     Value operator*(const Value& rhs) { return Value(inner->mul(*rhs.inner)); }
     Value operator/(const Value& rhs) { return Value(inner->div(*rhs.inner)); }
+    bool operator==(const Value& rhs) { return inner->eq(*rhs.inner); }
+    bool operator!=(const Value& rhs) { return !inner->eq(*rhs.inner); }
+    bool operator>(const Value& rhs)  { return inner->gt(*rhs.inner); }
+    bool operator<(const Value& rhs)  { return inner->lt(*rhs.inner); }
+    bool operator>=(const Value& rhs) { return inner->gt(*rhs.inner) || inner->eq(*rhs.inner); }
+    bool operator<=(const Value& rhs) { return inner->lt(*rhs.inner) || inner->eq(*rhs.inner); }
     Value& operator+=(const Value& rhs) { inner->self_add(*rhs.inner); return *this; }
     Value& operator-=(const Value& rhs) { inner->self_sub(*rhs.inner); return *this; }
     Value& operator*=(const Value& rhs) { inner->self_mul(*rhs.inner); return *this; }

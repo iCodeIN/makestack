@@ -193,7 +193,7 @@ export class Transpiler {
 
     private visitBinaryExpr(expr: t.BinaryExpression): string {
         const SUPPORTED_OPS: string[] = [
-            "+", "-", "*", "/",
+            "+", "-", "*", "/", "==", "!=", "<", ">", "<=", ">="
         ];
 
         if (!SUPPORTED_OPS.includes(expr.operator)) {

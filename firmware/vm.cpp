@@ -96,6 +96,43 @@ ValueInner *ValueInner::div(const ValueInner& rhs) {
     }
 }
 
+bool ValueInner::eq(const ValueInner& rhs) {
+    if (type == rhs.type) {
+        switch (type) {
+        case ValueType::Int:
+            return v_i == rhs.v_i;
+        case ValueType::String:
+            return v_s == rhs.v_s;
+        case ValueType::Bool:
+            return v_b == rhs.v_b;
+        case ValueType::Null:
+        case ValueType::Undefined:
+            return true;
+        default:
+            VM_PANIC("Invalid types for `=='.");
+        }
+    } else {
+        VM_PANIC("Invalid types for `=='.");
+    }
+}
+
+bool ValueInner::gt(const ValueInner& rhs) {
+    if (type == ValueType::Int && rhs.type == ValueType::Int) {
+        return v_i > rhs.v_i;
+    } else {
+        VM_PANIC("Invalid types for `>'.");
+    }
+}
+
+bool ValueInner::lt(const ValueInner& rhs) {
+    if (type == ValueType::Int && rhs.type == ValueType::Int) {
+        return v_i < rhs.v_i;
+    } else {
+        VM_PANIC("Invalid types for `<'.");
+    }
+}
+
+
 void ValueInner::self_add(const ValueInner& rhs) {
     if (type == ValueType::String) {
         v_s += rhs.toString();
