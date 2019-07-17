@@ -294,10 +294,10 @@ public:
     bool operator<(const Value& rhs)  { return inner->lt(*rhs.inner); }
     bool operator>=(const Value& rhs) { return inner->gt(*rhs.inner) || inner->eq(*rhs.inner); }
     bool operator<=(const Value& rhs) { return inner->lt(*rhs.inner) || inner->eq(*rhs.inner); }
-    Value& operator+=(const Value& rhs) { inner->self_add(*rhs.inner); return *this; }
-    Value& operator-=(const Value& rhs) { inner->self_sub(*rhs.inner); return *this; }
-    Value& operator*=(const Value& rhs) { inner->self_mul(*rhs.inner); return *this; }
-    Value& operator/=(const Value& rhs) { inner->self_div(*rhs.inner); return *this; }
+    Value operator+=(const Value& rhs) { inner->self_add(*rhs.inner); return *this; }
+    Value operator-=(const Value& rhs) { inner->self_sub(*rhs.inner); return *this; }
+    Value operator*=(const Value& rhs) { inner->self_mul(*rhs.inner); return *this; }
+    Value operator/=(const Value& rhs) { inner->self_div(*rhs.inner); return *this; }
 
     Value() : inner(nullptr) {}
 
