@@ -308,6 +308,9 @@ export class Transpiler {
             return this.visitAssignExpr(expr);
         } else if (t.isArrowFunctionExpression(expr)) {
             return this.visitArrowFuncExpr(expr);
+        } else if (t.isFunctionExpression(expr)) {
+            // XXX:
+            return this.visitArrowFuncExpr(expr as any as t.ArrowFunctionExpression);
         } else if (t.isConditionalExpression(expr)) {
             return this.visitConditionalExpr(expr);
         } else {
