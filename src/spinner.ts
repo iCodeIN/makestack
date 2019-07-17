@@ -6,6 +6,10 @@ export class Spinner {
     private timer?: NodeJS.Timer;
     private message?: string;
     public start() {
+        if (process.env.DISABLE_SPINNER) {
+            return;
+        }
+
         this.timer = setInterval(() => {
             this.count++;
             this.render();
@@ -13,6 +17,11 @@ export class Spinner {
     }
 
     public update(message: string) {
+        if (process.env.DISABLE_SPINNER) {
+            console.log(message);
+            return;
+        }
+
         const maxLen = (process.stdout.columns || 80) - 2;
         const truncated = message.slice(0, maxLen);
         this.message = truncated;
@@ -27,7 +36,6 @@ export class Spinner {
             readline.cursorTo(process.stdout, 0);
         }
     }
-
 
     private render() {
         if (this.message) {
