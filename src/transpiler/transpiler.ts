@@ -137,6 +137,20 @@ export class Transpiler {
         return "while (" + this.visitExpr(stmt.test) + ")" + this.visitBlockOrExpr(stmt.body);
     }
 
+    private visitForStmt(stmt: t.ForStatement): string {
+        let init;
+        if (t.isVariableDeclaration(stmt.init)) {
+            init = this.visitStmt(stmt.init);
+        } else {
+            init = this.visitExpr(stmt.init as t.Node);
+        }
+
+        const test = this.visitExpr(stmt.test as t.Node);
+        const update = this.visitExpr(stmt.update as t.Node);
+        const body = this.visitBlockOrExpr(stmt.body);
+        return `${init};\nfor (; ${test}; ${update}) ${body}`;
+    }
+
     private visitStmt(stmt: t.Statement): string {
         if (t.isExpressionStatement(stmt)) {
             return this.visitExprStmt(stmt);
@@ -146,6 +160,8 @@ export class Transpiler {
             return this.visitIfStmt(stmt);
         } else if (t.isWhileStatement(stmt)) {
             return this.visitWhileStmt(stmt);
+        } else if (t.isForStatement(stmt)) {
+            return this.visitForStmt(stmt);
         } else {
             throw new UnimplementedError(stmt);
         }

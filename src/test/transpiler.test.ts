@@ -137,3 +137,29 @@ test("while statement", () => {
         }
     `));
 });
+
+test("for statement", () => {
+    expect(transpile(`\
+        const app = require("makestack");
+        app.onReady((device) => {
+            for (let i = 0; i < 100; i++) {
+                device.print("finite loop");
+            }
+        });
+    `)).toStrictEqual(ignoreWhitespace(`
+        VM_FUNC_DEF(__lambda_0,__closure_0) {
+            VM_SET("i", VM_INT(0));
+            for (; (VM_GET("i") < VM_INT(100)); VM_GET("i")++) {
+                VM_CALL(VM_ANON_LOC(4), VM_MGET(VM_GET("device"), VM_STR("print")),
+                        1, VM_STR("finiteloop"));
+            };
+            return VM_UNDEF;
+        }
+        VM_FUNC_DEF_END
+
+        void app_setup(Context *__ctx) {
+            VM_CALL(VM_APP_LOC("(top level)", 2), VM_GET("__onReady"), 1,
+                    VM_FUNC(__lambda_0, __closure_0));
+        }
+    `));
+});
