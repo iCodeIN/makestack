@@ -226,6 +226,27 @@ export class Transpiler {
         return `VM_STR("${expr.value}")`;
     }
 
+    private visitTemplateLiteral(expr: t.TemplateLiteral): string {
+        let tmpl = "";
+        let str = true;
+        let expr_i = 0;
+        let str_i = 0;
+        while (expr.quasis[str_i]) {
+            if (str) {
+                const frag = expr.quasis[str_i++];
+                tmpl += `VM_STR("${frag.value.raw}")`;
+                tmpl += frag.tail ? "" : " + ";
+            } else {
+                const exprStr = this.visitExpr(expr.expressions[expr_i++]);
+                tmpl += `(${exprStr}) + `;
+            }
+
+            str = !str;
+        }
+
+        return `(${tmpl})`;
+    }
+
     private visitIdentExpr(expr: t.Identifier): string {
         return `VM_GET("${expr.name}")`;
     }
@@ -321,6 +342,8 @@ export class Transpiler {
             return this.visitBooleanLit(expr);
         } else if (t.isStringLiteral(expr)) {
             return this.visitStringLit(expr);
+        } else if (t.isTemplateLiteral(expr)) {
+            return this.visitTemplateLiteral(expr);
         } else if (t.isIdentifier(expr)) {
             return this.visitIdentExpr(expr);
         } else if (t.isMemberExpression(expr)) {
