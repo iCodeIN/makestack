@@ -139,7 +139,16 @@ export const DEVICE_FILE_OPTS = [
     },
 ];
 
-export const BUILD_OPTS = [...APP_OPTS, ...ADAPTER_OPTS, ...BOARD_OPTS];
+export const BUILD_OPTS = [
+    {
+        name: "--heartbeat-interval <seconds>",
+        desc: "The interval of the heartbeat periodically sent from a device.",
+        default: 30,
+    },
+    ...APP_OPTS,
+    ...ADAPTER_OPTS,
+    ...BOARD_OPTS
+];
 
 export const WATCH_OPTS = [
     {

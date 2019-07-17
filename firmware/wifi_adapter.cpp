@@ -164,7 +164,7 @@ void wifi_adapter_task() {
     url += "/makestack/protocol";
     while (1) {
         send_and_receive_payload(url);
-        vTaskDelay(1000 / portTICK_PERIOD_MS);
+        vTaskDelay((MAKESTACK_HEARTBEAT_INTERVAL * 1000) / portTICK_PERIOD_MS);
     }
 }
 

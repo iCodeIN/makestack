@@ -1,7 +1,7 @@
 #ifndef __MAKESTACK_TYPES_H__
 #define __MAKESTACK_TYPES_H__
 
-// TODO: Eeduce #include
+// TODO: Reduce #include
 #include <driver/gpio.h>
 #include <driver/uart.h>
 #include <esp_event.h>
@@ -18,6 +18,10 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdbool.h>
+
+#ifndef MAKESTACK_HEARTBEAT_INTERVAL
+#define MAKESTACK_HEARTBEAT_INTERVAL 15
+#endif
 
 template<typename T>
 static inline T min(T a, T b) {

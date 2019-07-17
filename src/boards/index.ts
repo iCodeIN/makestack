@@ -2,6 +2,7 @@ import * as esp32 from "./esp32";
 
 export interface BuildOptions {
     adapter: string,
+    heartbeatInterval: number,
     wifiSsid?: string,
     wifiPassword?: string,
     serverUrl?: string,

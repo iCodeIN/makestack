@@ -113,6 +113,7 @@ function make(firmwareDir: string, componentDir: string, buildLogPath: string, o
                 PATH: process.env.PATH,
                 MY_COMPONENT_DIRS: componentDir,
                 MAKESTACK_APP: "1",
+                MAKESTACK_HEARTBEAT_INTERVAL: opts.heartbeatInterval.toString(),
                 ADAPTER: opts.adapter,
                 WIFI_SSID: opts.wifiSsid || "",
                 WIFI_PASSWORD: opts.wifiPassword || "",
