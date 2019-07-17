@@ -4,33 +4,35 @@ jobs:
   include:
     - stage: test
       os: linux
+      dist: xenial
       node_js: "10"
-      install:
-        - yarn
-      script:
-        - yarn test
       addons:
         apt:
           packages:
             - libncurses-dev
             - flex
             - bison
+            - gperf
             - python-serial
             - python-cryptography
             - python-future
             - python-pyparsing
             - python-pyelftools
-
     - os: osx
       osx_image: xcode11
       node_js: "10"
-      install:
-        - yarn
-      script:
-        - yarn test
+
+install:
+  - yarn
+
+script:
+  - yarn build
+  - yarn test
+  - DISABLE_SPINNER=y ./makestack build --app-dir examples/blink --board esp32
 
 cache:
   yarn: true
+  pip: true
   directories:
     - firmware/deps
 
