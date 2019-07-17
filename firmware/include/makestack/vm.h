@@ -298,6 +298,10 @@ public:
     Value operator-=(const Value& rhs) { inner->self_sub(*rhs.inner); return *this; }
     Value operator*=(const Value& rhs) { inner->self_mul(*rhs.inner); return *this; }
     Value operator/=(const Value& rhs) { inner->self_div(*rhs.inner); return *this; }
+    Value operator++(int x) { Value prev = *this; inner->self_add(Value::Int(1).inner); return prev; }
+    Value operator--(int x) { Value prev = *this; inner->self_sub(Value::Int(1).inner); return prev; }
+    Value operator++() { inner->self_add(Value::Int(1).inner); return *this; }
+    Value operator--() { inner->self_sub(Value::Int(1).inner); return *this; }
 
     Value() : inner(nullptr) {}
 

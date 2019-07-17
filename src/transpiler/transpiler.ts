@@ -218,6 +218,16 @@ export class Transpiler {
         return `VM_MGET(${obj}, ${prop})`
     }
 
+    private visitUpdateExpr(expr: t.UpdateExpression): string {
+        const SUPPORTED_OPS: string[] = ["++", "--"];
+        if (!SUPPORTED_OPS.includes(expr.operator)) {
+            throw new TranspileError(expr, `\`${expr.operator}' operator is not yet supported.`);
+        }
+
+        let arg = this.visitExpr(expr.argument);
+        return expr.prefix ? (expr.operator + arg) : (arg + expr.operator);
+    }
+
     private visitBinaryExpr(expr: t.BinaryExpression): string {
         const SUPPORTED_OPS: string[] = [
             "+", "-", "*", "/", "==", "!=", "<", ">", "<=", ">="
@@ -263,6 +273,8 @@ export class Transpiler {
             return this.visitCallExpr(expr);
         } else if (t.isBinaryExpression(expr)) {
             return this.visitBinaryExpr(expr);
+        } else if (t.isUpdateExpression(expr)) {
+            return this.visitUpdateExpr(expr);
         } else if (t.isAssignmentExpression(expr)) {
             return this.visitAssignExpr(expr);
         } else if (t.isArrowFunctionExpression(expr)) {
