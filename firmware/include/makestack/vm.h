@@ -260,9 +260,11 @@ public:
     }
 
     Value& operator=(const Value& from) {
-        if (this == &from) {
+        if (inner == from.inner) {
             return *this;
         }
+
+        deref();
 
         inner = from.inner;
         inner->ref_count++;
@@ -276,18 +278,26 @@ public:
 
     Value(Value&& from) {
         inner = from.inner;
+        from.inner = nullptr;
     }
 
     ~Value() {
-        inner->ref_count--;
-        if (inner->ref_count == 0) {
-            delete inner;
-        }
+        deref();
     }
 
 private:
     Value(ValueInner *value) {
         inner = value;
+    }
+
+    void deref() {
+        if (inner) {
+            inner->ref_count--;
+            if (inner->ref_count == 0) {
+                delete inner;
+            }
+            inner = nullptr;
+        }
     }
 
     ValueInner *inner;
