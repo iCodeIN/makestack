@@ -267,10 +267,7 @@ export class Transpiler {
     }
 
     private visitUnaryExpr(expr: t.UnaryExpression): string {
-        const SUPPORTED_OPS: string[] = [
-            "!"
-        ];
-
+        const SUPPORTED_OPS: string[] = [ "!", "~", "+", "-" ];
         if (!SUPPORTED_OPS.includes(expr.operator)) {
             throw new TranspileError(expr, `\`${expr.operator}' operator is not yet supported.`);
         }
@@ -280,7 +277,7 @@ export class Transpiler {
 
     private visitBinaryExpr(expr: t.BinaryExpression): string {
         const SUPPORTED_OPS: string[] = [
-            "+", "-", "*", "/", "==", "!=", "<", ">", "<=", ">="
+            "+", "-", "*", "/", "==", "!=", "<", ">", "<=", ">=", "&", "|", "^", "<<", ">>", "%"
         ];
 
         if (!SUPPORTED_OPS.includes(expr.operator)) {
@@ -292,7 +289,7 @@ export class Transpiler {
 
     private visitAssignExpr(expr: t.AssignmentExpression): string {
         const SUPPORTED_OPS: string[] = [
-            "=", "+=", "-=", "*=", "/=",
+            "=", "+=", "-=", "*=", "/=",  "&=", "|=", "^=", "<<=", ">>="
         ];
 
         if (!SUPPORTED_OPS.includes(expr.operator)) {

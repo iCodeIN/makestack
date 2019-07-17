@@ -96,6 +96,43 @@ ValueInner *ValueInner::div(const ValueInner& rhs) {
     }
 }
 
+ValueInner *ValueInner::mod(const ValueInner& rhs) {
+    return new ValueInner(toInt() % rhs.toInt());
+}
+
+ValueInner *ValueInner::bitwise_and(const ValueInner& rhs) {
+    return new ValueInner(toInt() & rhs.toInt());
+}
+
+ValueInner *ValueInner::bitwise_or(const ValueInner& rhs) {
+    return new ValueInner(toInt() | rhs.toInt());
+}
+
+ValueInner *ValueInner::bitwise_xor(const ValueInner& rhs) {
+    return new ValueInner(toInt() ^ rhs.toInt());
+}
+
+ValueInner *ValueInner::bitwise_lshift(const ValueInner& rhs) {
+    return new ValueInner(toInt() << rhs.toInt());
+}
+
+ValueInner *ValueInner::bitwise_rshift(const ValueInner& rhs) {
+    return new ValueInner(toInt() >> rhs.toInt());
+}
+
+ValueInner *ValueInner::bitwise_not() {
+    return new ValueInner(~toInt());
+}
+
+ValueInner *ValueInner::unary_plus() {
+    return new ValueInner(toInt());
+}
+
+ValueInner *ValueInner::unary_minus() {
+    return new ValueInner(-toInt());
+}
+
+
 bool ValueInner::eq(const ValueInner& rhs) {
     if (type == rhs.type) {
         switch (type) {
@@ -167,6 +204,56 @@ void ValueInner::self_div(const ValueInner& rhs) {
     v_i /= rhs.toInt();
 
 }
+
+void ValueInner::self_mod(const ValueInner& rhs) {
+    if (type != ValueType::Int) {
+        VM_PANIC("Expected an integer.");
+    }
+
+    v_i = rhs.toInt();
+}
+
+void ValueInner::self_bitwise_and(const ValueInner& rhs) {
+    if (type != ValueType::Int) {
+        VM_PANIC("Expected an integer.");
+    }
+
+    v_i &= rhs.toInt();
+}
+
+void ValueInner::self_bitwise_or(const ValueInner& rhs) {
+    if (type != ValueType::Int) {
+        VM_PANIC("Expected an integer.");
+    }
+
+    v_i |= rhs.toInt();
+}
+
+void ValueInner::self_bitwise_xor(const ValueInner& rhs) {
+    if (type != ValueType::Int) {
+        VM_PANIC("Expected an integer.");
+    }
+
+    v_i ^= rhs.toInt();
+}
+
+void ValueInner::self_bitwise_lshift(const ValueInner& rhs) {
+    if (type != ValueType::Int) {
+        VM_PANIC("Expected an integer.");
+    }
+
+    v_i <<= rhs.toInt();
+}
+
+void ValueInner::self_bitwise_rshift(const ValueInner& rhs) {
+    if (type != ValueType::Int) {
+        VM_PANIC("Expected an integer.");
+    }
+
+    v_i >>= rhs.toInt();
+}
+
+
 
 Value Value::call(Context *ctx, int nargs, Value *args) {
     if (inner->type != ValueType::Function) {

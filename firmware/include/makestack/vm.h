@@ -181,6 +181,15 @@ public:
     ValueInner *sub(const ValueInner& rhs);
     ValueInner *mul(const ValueInner& rhs);
     ValueInner *div(const ValueInner& rhs);
+    ValueInner *mod(const ValueInner& rhs);
+    ValueInner *bitwise_and(const ValueInner& rhs);
+    ValueInner *bitwise_or(const ValueInner& rhs);
+    ValueInner *bitwise_xor(const ValueInner& rhs);
+    ValueInner *bitwise_lshift(const ValueInner& rhs);
+    ValueInner *bitwise_rshift(const ValueInner& rhs);
+    ValueInner *bitwise_not();
+    ValueInner *unary_plus();
+    ValueInner *unary_minus();
     bool eq(const ValueInner& rhs);
     bool gt(const ValueInner& rhs);
     bool lt(const ValueInner& rhs);
@@ -188,6 +197,12 @@ public:
     void self_sub(const ValueInner& rhs);
     void self_mul(const ValueInner& rhs);
     void self_div(const ValueInner& rhs);
+    void self_mod(const ValueInner& rhs);
+    void self_bitwise_and(const ValueInner& rhs);
+    void self_bitwise_or(const ValueInner& rhs);
+    void self_bitwise_xor(const ValueInner& rhs);
+    void self_bitwise_lshift(const ValueInner& rhs);
+    void self_bitwise_rshift(const ValueInner& rhs);
 
     ~ValueInner() {
         switch (type) {
@@ -288,6 +303,15 @@ public:
     Value operator-(const Value& rhs) { return Value(inner->sub(*rhs.inner)); }
     Value operator*(const Value& rhs) { return Value(inner->mul(*rhs.inner)); }
     Value operator/(const Value& rhs) { return Value(inner->div(*rhs.inner)); }
+    Value operator%(const Value& rhs) { return Value(inner->mod(*rhs.inner)); }
+    Value operator&(const Value& rhs) { return Value(inner->bitwise_and(*rhs.inner)); }
+    Value operator|(const Value& rhs) { return Value(inner->bitwise_or(*rhs.inner)); }
+    Value operator^(const Value& rhs) { return Value(inner->bitwise_xor(*rhs.inner)); }
+    Value operator<<(const Value& rhs) { return Value(inner->bitwise_lshift(*rhs.inner)); }
+    Value operator>>(const Value& rhs) { return Value(inner->bitwise_rshift(*rhs.inner)); }
+    Value operator~() { return Value(inner->bitwise_not()); }
+    Value operator+() { return Value(inner->unary_plus()); }
+    Value operator-() { return Value(inner->unary_minus()); }
     bool operator==(const Value& rhs) { return inner->eq(*rhs.inner); }
     bool operator!=(const Value& rhs) { return !inner->eq(*rhs.inner); }
     bool operator>(const Value& rhs)  { return inner->gt(*rhs.inner); }
@@ -298,6 +322,12 @@ public:
     Value operator-=(const Value& rhs) { inner->self_sub(*rhs.inner); return *this; }
     Value operator*=(const Value& rhs) { inner->self_mul(*rhs.inner); return *this; }
     Value operator/=(const Value& rhs) { inner->self_div(*rhs.inner); return *this; }
+    Value operator%=(const Value& rhs) { inner->self_mod(*rhs.inner); return *this; }
+    Value operator&=(const Value& rhs) { inner->self_bitwise_and(*rhs.inner); return *this; }
+    Value operator|=(const Value& rhs) { inner->self_bitwise_or(*rhs.inner); return *this; }
+    Value operator^=(const Value& rhs) { inner->self_bitwise_xor(*rhs.inner); return *this; }
+    Value operator<<=(const Value& rhs) { inner->self_bitwise_lshift(*rhs.inner); return *this; }
+    Value operator>>=(const Value& rhs) { inner->self_bitwise_rshift(*rhs.inner); return *this; }
     Value operator++(int x) { Value prev = *this; inner->self_add(Value::Int(1).inner); return prev; }
     Value operator--(int x) { Value prev = *this; inner->self_sub(Value::Int(1).inner); return prev; }
     Value operator++() { inner->self_add(Value::Int(1).inner); return *this; }
