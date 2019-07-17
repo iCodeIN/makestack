@@ -99,17 +99,42 @@ export class Transpiler {
             .join(";");
     }
 
-    private visitWhileStmt(stmt: t.WhileStatement): string {
-        let body;
-        if (t.isBlockStatement(stmt.body)) {
-            body = this.visitBlockStmt(stmt.body);
-        } else if (t.isExpressionStatement(stmt.body)) {
-            body = this.visitExprStmt(stmt.body);
+    private visitBlockOrExpr(blockOrExpr: t.Node): string {
+        if (t.isBlockStatement(blockOrExpr)) {
+            return this.visitBlockStmt(blockOrExpr);
+        } else if (t.isExpressionStatement(blockOrExpr)) {
+            return this.visitExprStmt(blockOrExpr) + ";";
         } else {
-            throw new UnimplementedError(stmt.body);
+            throw new UnimplementedError(blockOrExpr);
+        }
+    }
+
+    private visitIfStmt(stmt: t.IfStatement): string {
+        let code = "";
+        let ifType = "if";
+        let ifStmt = stmt;
+        while (ifStmt) {
+            const test = this.visitExpr(ifStmt.test);
+            const body = this.visitBlockOrExpr(ifStmt.consequent);
+            code += `${ifType} (${test}) ${body}`;
+            if (ifStmt.alternate) {
+                if (t.isIfStatement(ifStmt.alternate)) {
+                    ifType = "else if";
+                    ifStmt = ifStmt.alternate;
+                } else {
+                    code += "else " + this.visitBlockOrExpr(ifStmt.alternate);
+                    break;
+                }
+            } else {
+                break;
+            }
         }
 
-        return "while (" + this.visitExpr(stmt.test) + ")" + body;
+        return code;
+    }
+
+    private visitWhileStmt(stmt: t.WhileStatement): string {
+        return "while (" + this.visitExpr(stmt.test) + ")" + this.visitBlockOrExpr(stmt.body);
     }
 
     private visitStmt(stmt: t.Statement): string {
@@ -117,6 +142,8 @@ export class Transpiler {
             return this.visitExprStmt(stmt);
         } else if (t.isVariableDeclaration(stmt)) {
             return this.visitVarDeclStmt(stmt);
+        } else if (t.isIfStatement(stmt)) {
+            return this.visitIfStmt(stmt);
         } else if (t.isWhileStatement(stmt)) {
             return this.visitWhileStmt(stmt);
         } else {

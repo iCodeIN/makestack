@@ -56,6 +56,47 @@ test("binary operators", () => {
     `));
 });
 
+test("if statement", () => {
+    expect(transpile(`\
+        const app = require("makestack");
+        app.onReady((device) => {
+            if (1 == 2)
+                device.print("Something went wrong!");
+
+            if (device.location == "earth") {
+                device.print("I'm on the earth!");
+            } else if (device.name == "moon")
+                device.print("I'm on the moon!");
+            else
+                device.print("Where am I?");
+        });
+    `)).toStrictEqual(ignoreWhitespace(`
+        VM_FUNC_DEF(__lambda_0, __closure_0) {
+            if ((VM_INT(1) == VM_INT(2)))
+                VM_CALL(VM_ANON_LOC(4),VM_MGET(VM_GET("device"), VM_STR("print")),
+                       1, VM_STR("Something went wrong!"));;
+
+            if ((VM_MGET(VM_GET("device"), VM_STR("location")) == VM_STR("earth"))) {
+                VM_CALL(VM_ANON_LOC(7),VM_MGET(VM_GET("device"), VM_STR("print")),
+                       1, VM_STR("I'm on the earth!"));
+            } else if((VM_MGET(VM_GET("device"), VM_STR("name"))==VM_STR("moon")))
+                VM_CALL(VM_ANON_LOC(9), VM_MGET(VM_GET("device"), VM_STR("print")),
+                        1, VM_STR("I'm on the moon!"));
+            else
+                VM_CALL(VM_ANON_LOC(11), VM_MGET(VM_GET("device"), VM_STR("print")),
+                        1, VM_STR("WhereamI?"));;
+
+          return VM_UNDEF;
+        }
+        VM_FUNC_DEF_END
+
+        void app_setup(Context *__ctx) {
+          VM_CALL(VM_APP_LOC("(top level)", 2), VM_GET("__onReady"), 1,
+                  VM_FUNC(__lambda_0, __closure_0));
+        }
+    `));
+});
+
 test("while statement", () => {
     expect(transpile(`\
         const app = require("makestack");
@@ -84,7 +125,7 @@ test("while statement", () => {
                     VM_MGET(VM_GET("device"), VM_STR("print")),
                     1,
                     VM_STR("unreachable!")
-                );
+                );;
 
           return VM_UNDEF;
         }
