@@ -42,16 +42,16 @@ test("binary operators", () => {
         });
     `)).toStrictEqual(ignoreWhitespace(`
         VM_FUNC_DEF(__lambda_0, __closure_0) {
-          VM_SET("ans", VM_INT(0));
-          VM_SET("ans", ((VM_INT(1)+VM_INT(2))-(VM_INT(3)*VM_INT(4))));
-          (VM_GET("ans") += VM_INT(5));
-          return VM_UNDEF;
+            VM_SET("ans", VM_INT(0));
+            VM_SET("ans", ((VM_INT(1)+VM_INT(2))-(VM_INT(3)*VM_INT(4))));
+            (VM_GET("ans") += VM_INT(5));
+            return VM_UNDEF;
         }
         VM_FUNC_DEF_END
 
         void app_setup(Context *__ctx) {
-          VM_CALL(VM_APP_LOC("(top level)", 2), VM_GET("__onReady"), 1,
-                  VM_FUNC(__lambda_0, __closure_0));
+            VM_CALL(VM_APP_LOC("(top level)", 2), VM_GET("__onReady"), 1,
+                    VM_FUNC(__lambda_0, __closure_0));
         }
     `));
 });
@@ -86,13 +86,13 @@ test("if statement", () => {
                 VM_CALL(VM_ANON_LOC(11), VM_MGET(VM_GET("device"), VM_STR("print")),
                         1, VM_STR("WhereamI?"));;
 
-          return VM_UNDEF;
+            return VM_UNDEF;
         }
         VM_FUNC_DEF_END
 
         void app_setup(Context *__ctx) {
-          VM_CALL(VM_APP_LOC("(top level)", 2), VM_GET("__onReady"), 1,
-                  VM_FUNC(__lambda_0, __closure_0));
+            VM_CALL(VM_APP_LOC("(top level)", 2), VM_GET("__onReady"), 1,
+                    VM_FUNC(__lambda_0, __closure_0));
         }
     `));
 });
@@ -127,7 +127,7 @@ test("while statement", () => {
                     VM_STR("unreachable!")
                 );;
 
-          return VM_UNDEF;
+            return VM_UNDEF;
         }
         VM_FUNC_DEF_END
 
