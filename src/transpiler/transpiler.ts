@@ -151,6 +151,11 @@ export class Transpiler {
         return `${init};\nfor (; ${test}; ${update}) ${body}`;
     }
 
+    private visitReturnStmt(stmt: t.ReturnStatement): string {
+        const value = this.visitExpr(stmt.argument as t.Node);
+        return `return ${value};`;
+    }
+
     private visitStmt(stmt: t.Statement): string {
         if (t.isExpressionStatement(stmt)) {
             return this.visitExprStmt(stmt);
@@ -162,6 +167,8 @@ export class Transpiler {
             return this.visitWhileStmt(stmt);
         } else if (t.isForStatement(stmt)) {
             return this.visitForStmt(stmt);
+        } else if (t.isReturnStatement(stmt)) {
+            return this.visitReturnStmt(stmt);
         } else {
             throw new UnimplementedError(stmt);
         }
