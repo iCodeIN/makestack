@@ -2,7 +2,7 @@ import { spawn, spawnSync } from "child_process";
 import * as os from "os";
 import * as path from "path";
 import { resolveRepoPath, exec, createTmpDir } from "../helpers";
-import * as fs from "fs";
+import * as fs from "fs-extra";
 import { BuildError, BuildOptions } from ".";
 import { logger } from "../logger";
 import { Spinner } from "../spinner";
@@ -97,6 +97,7 @@ async function installDependencies(firmwareDir: string) {
     const requirementsPath = path.join(tmpDir, "esp-idf/requirements.txt");
     exec(["pip", "install", "--user", "-r", requirementsPath]);
 
+    fs.mkdirpSync(path.join(firmwareDir, "deps"));
     fs.renameSync(tmpDir, depDir);
     logger.success("Successfully downloaded dependencies");
 }
