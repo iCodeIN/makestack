@@ -280,6 +280,13 @@ export class Transpiler {
         }
     }
 
+    private visitConditionalExpr(expr: t.ConditionalExpression): string {
+        const test = this.visitExpr(expr.test);
+        const trueExpr = this.visitExpr(expr.consequent);
+        const falseExpr = this.visitExpr(expr.alternate);
+        return `(${test}) ? (${trueExpr}) : (${falseExpr})`;
+    }
+
     private visitExpr(expr: t.Node): string {
         if (t.isNumericLiteral(expr)) {
             return this.visitNumberLit(expr);
@@ -301,6 +308,8 @@ export class Transpiler {
             return this.visitAssignExpr(expr);
         } else if (t.isArrowFunctionExpression(expr)) {
             return this.visitArrowFuncExpr(expr);
+        } else if (t.isConditionalExpression(expr)) {
+            return this.visitConditionalExpr(expr);
         } else {
             throw new UnimplementedError(expr);
         }
