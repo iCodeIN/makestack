@@ -52,6 +52,85 @@ ErrorInfo::~ErrorInfo() {
     }
 }
 
+ValueInner *ValueInner::add(const ValueInner& rhs) {
+    if (type == ValueType::String || rhs.type == ValueType::String) {
+        std::string new_s = toString() + rhs.toString();
+        return new ValueInner(new_s.c_str());
+    } else if (type == ValueType::Int && rhs.type == ValueType::Int) {
+        int new_i = toInt() + rhs.toInt();
+        type = ValueType::Int;
+        return new ValueInner(new_i);
+    } else {
+        /* Insane type combinations. */
+        VM_PANIC("Invalid types for `+'.");
+    }
+}
+
+ValueInner *ValueInner::sub(const ValueInner& rhs) {
+    if (type == ValueType::Int && rhs.type == ValueType::Int) {
+        int new_i = toInt() - rhs.toInt();
+        return new ValueInner(new_i);
+    } else {
+        /* Insane type combinations. */
+        VM_PANIC("Invalid types for `-'.");
+    }
+}
+
+ValueInner *ValueInner::mul(const ValueInner& rhs) {
+    if (type == ValueType::Int && rhs.type == ValueType::Int) {
+        int new_i = toInt() * rhs.toInt();
+        return new ValueInner(new_i);
+    } else {
+        /* Insane type combinations. */
+        VM_PANIC("Invalid types for `*'.");
+    }
+}
+
+ValueInner *ValueInner::div(const ValueInner& rhs) {
+    if (type == ValueType::Int && rhs.type == ValueType::Int) {
+        int new_i = toInt() / rhs.toInt();
+        return new ValueInner(new_i);
+    } else {
+        /* Insane type combinations. */
+        VM_PANIC("Invalid types for `/'.");
+    }
+}
+
+void ValueInner::self_add(const ValueInner& rhs) {
+    if (type == ValueType::String) {
+        v_s += rhs.toString();
+    } else if (type == ValueType::Int) {
+        v_i += rhs.toInt();
+    } else {
+        VM_PANIC("Invalid types for `+='.");
+    }
+}
+
+void ValueInner::self_sub(const ValueInner& rhs) {
+    if (type != ValueType::Int) {
+        VM_PANIC("Invalid types for `-='.");
+    }
+
+    v_i -= rhs.toInt();
+}
+
+void ValueInner::self_mul(const ValueInner& rhs) {
+    if (type != ValueType::Int) {
+        VM_PANIC("Invalid types for `*='.");
+    }
+
+    v_i *= rhs.toInt();
+}
+
+void ValueInner::self_div(const ValueInner& rhs) {
+    if (type != ValueType::Int) {
+        VM_PANIC("Invalid types for `/='.");
+    }
+
+    v_i /= rhs.toInt();
+
+}
+
 Value Value::call(Context *ctx, int nargs, Value *args) {
     if (inner->type != ValueType::Function) {
         return VM_CREATE_ERROR("not callable");
@@ -90,6 +169,7 @@ Value Value::set(Value prop, Value value) {
 
         value.inner->ref_count++;
         inner->v_obj[prop.toString()] = value.inner;
+        return value;
     }
     default:
         return Value::Undefined();
@@ -109,8 +189,9 @@ Value Scope::get(const char *id) {
     VM_PANIC("undefined reference: %s", id);
 }
 
-void Scope::set(const char *id, Value value) {
+Value Scope::set(const char *id, Value value) {
     vars[id] = Var(value);
+    return value;
 }
 
 void Context::enter_scope(SourceLoc callee) {

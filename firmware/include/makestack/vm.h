@@ -176,6 +176,16 @@ public:
         }
     }
 
+
+    ValueInner *add(const ValueInner& rhs);
+    ValueInner *sub(const ValueInner& rhs);
+    ValueInner *mul(const ValueInner& rhs);
+    ValueInner *div(const ValueInner& rhs);
+    void self_add(const ValueInner& rhs);
+    void self_sub(const ValueInner& rhs);
+    void self_mul(const ValueInner& rhs);
+    void self_div(const ValueInner& rhs);
+
     ~ValueInner() {
         switch (type) {
         case ValueType::Invalid:
@@ -271,6 +281,17 @@ public:
         return *this;
     }
 
+    Value operator+(const Value& rhs) { return Value(inner->add(*rhs.inner)); }
+    Value operator-(const Value& rhs) { return Value(inner->sub(*rhs.inner)); }
+    Value operator*(const Value& rhs) { return Value(inner->mul(*rhs.inner)); }
+    Value operator/(const Value& rhs) { return Value(inner->div(*rhs.inner)); }
+    Value& operator+=(const Value& rhs) { inner->self_add(*rhs.inner); return *this; }
+    Value& operator-=(const Value& rhs) { inner->self_sub(*rhs.inner); return *this; }
+    Value& operator*=(const Value& rhs) { inner->self_mul(*rhs.inner); return *this; }
+    Value& operator/=(const Value& rhs) { inner->self_div(*rhs.inner); return *this; }
+
+    Value() : inner(nullptr) {}
+
     Value(Value& from) {
         inner = from.inner;
         inner->ref_count++;
@@ -326,7 +347,7 @@ public:
 
     Scope(Scope *prev) : ref_count(1), prev(prev) {}
     Value get(const char *id);
-    void set(const char *id, Value value);
+    Value set(const char *id, Value value);
 };
 
 class Context {

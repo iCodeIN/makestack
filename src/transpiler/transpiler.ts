@@ -191,6 +191,38 @@ export class Transpiler {
         return `VM_MGET(${obj}, ${prop})`
     }
 
+    private visitBinaryExpr(expr: t.BinaryExpression): string {
+        const SUPPORTED_OPS: string[] = [
+            "+", "-", "*", "/",
+        ];
+
+        if (!SUPPORTED_OPS.includes(expr.operator)) {
+            throw new TranspileError(expr, `\`${expr.operator}' operator is not yet supported.`);
+        }
+
+        return "(" + this.visitExpr(expr.left) + expr.operator + this.visitExpr(expr.right) + ")";
+    }
+
+    private visitAssignExpr(expr: t.AssignmentExpression): string {
+        const SUPPORTED_OPS: string[] = [
+            "=", "+=", "-=", "*=", "/=",
+        ];
+
+        if (!SUPPORTED_OPS.includes(expr.operator)) {
+            throw new TranspileError(expr, `\`${expr.operator}' operator is not yet supported.`);
+        }
+
+        if (expr.operator == "=") {
+            if (!t.isIdentifier(expr.left)) {
+                throw new TranspileError(expr, "The left-hand side of `=' operator must be an identifier.");
+            }
+
+            return `VM_SET("${expr.left.name}", ${this.visitExpr(expr.right)})`;
+        } else {
+            return "(" + this.visitExpr(expr.left) + expr.operator + this.visitExpr(expr.right) + ")";
+        }
+    }
+
     private visitExpr(expr: t.Node): string {
         if (t.isNumericLiteral(expr)) {
             return this.visitNumberLit(expr);
@@ -202,6 +234,10 @@ export class Transpiler {
             return this.visitMemberExpr(expr);
         } else if (t.isCallExpression(expr)) {
             return this.visitCallExpr(expr);
+        } else if (t.isBinaryExpression(expr)) {
+            return this.visitBinaryExpr(expr);
+        } else if (t.isAssignmentExpression(expr)) {
+            return this.visitAssignExpr(expr);
         } else if (t.isArrowFunctionExpression(expr)) {
             return this.visitArrowFuncExpr(expr);
         } else {
