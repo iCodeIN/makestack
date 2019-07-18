@@ -152,7 +152,6 @@ void run_app() {
     device_object.set(Value::String("pinMode"), Value::Function(api_pin_mode));
     device_object.set(Value::String("digitalWrite"), Value::Function(api_digital_write));
     device_object.set(Value::String("analogRead"), Value::Function(api_analog_read));
-    app_vm->globals.set("device", device_object);
 
     INFO("Initializing the app...");
     app_setup(app_ctx);
