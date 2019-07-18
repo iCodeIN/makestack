@@ -25,10 +25,9 @@ install:
 script:
   - yarn build
   - yarn test
-  - DISABLE_SPINNER=y ./makestack build --app-dir examples/blink --board esp32
   # XXX: On macOS we need to run build twice (perhaps build dependencies of
   #      auto-generated makefiles are broken).
-  - DISABLE_SPINNER=y ./makestack build --app-dir examples/blink --board esp32
+  - "DISABLE_SPINNER=y ./makestack build --app-dir examples/blink || DISABLE_SPINNER=y ./makestack build --app-dir examples/blink"
 
 cache:
   yarn: true
