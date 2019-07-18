@@ -157,6 +157,14 @@ export class Transpiler {
         return `${init};\nfor (; ${test}; ${update}) ${body}`;
     }
 
+    private visitBreakStmt(stmt: t.BreakStatement): string {
+        if (stmt.label) {
+            throw new UnimplementedError(stmt.label);
+        }
+
+        return `break;`;
+    }
+
     private visitReturnStmt(stmt: t.ReturnStatement): string {
         const value = this.visitExpr(stmt.argument as t.Node);
         return `return ${value};`;
@@ -175,6 +183,8 @@ export class Transpiler {
             return this.visitDoWhileStmt(stmt);
         } else if (t.isForStatement(stmt)) {
             return this.visitForStmt(stmt);
+        } else if (t.isBreakStatement(stmt)) {
+            return this.visitBreakStmt(stmt);
         } else if (t.isReturnStatement(stmt)) {
             return this.visitReturnStmt(stmt);
         } else {
