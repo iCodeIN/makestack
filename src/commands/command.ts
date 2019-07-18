@@ -47,9 +47,15 @@ export const validateAppDir: Validator = (appDir: string): any => {
         throw new Error(`${appDir} is not a directory`);
     }
 
+    const packageJson = path.join(appDir, "package.json");
+    if (!fs.existsSync(packageJson)) {
+        throw new Error(`${packageJson} does not exist`);
+    }
+
     const appJs = path.join(appDir, "app.js");
-    if (!fs.existsSync(appJs)) {
-        throw new Error(`${appJs} does not exist`);
+    const appTs = path.join(appDir, "app.ts");
+    if (!fs.existsSync(appJs) && !fs.existsSync(appTs)) {
+        throw new Error(`Neither ${appJs} nor ${appTs} does not exist.`);
     }
 
     return appDir;

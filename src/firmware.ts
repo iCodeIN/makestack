@@ -1,9 +1,8 @@
-import * as fs from "fs";
+import * as fs from "fs-extra";
 import * as path from "path";
 import { Board, BuildOptions } from "./boards";
 import { Transpiler } from "./transpiler";
-import { logger } from "./logger";
-import { render } from "./helpers";
+import { render, execScriptHook } from "./helpers";
 
 export interface Credential {
     version: number, /* FIXME: use bigint */
@@ -38,5 +37,6 @@ export function transpileApp(appDir: string): string {
 }
 
 export async function buildApp(board: Board, appDir: string, opts: BuildOptions) {
+    execScriptHook(appDir, "build");
     await board.buildFirmware(appDir, transpileApp(appDir), opts);
 }

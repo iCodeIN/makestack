@@ -12,27 +12,76 @@ const PACKAGE_JSON = `\
         "name": "{{ name }}",
         "board": "esp32"
     },
-    "dependencies": {
+    "scripts": {
+        "build": "./node_modules/.bin/tsc --outFile app.js app.ts"
     }
 }
 `
 
 const APP_JS = `\
-const device = require("makestack/device");
+const app = require("makestack")
 
-device.onReady((api) => {
-    const pin = 15;
-    api.print("Hello from {{ name }}!");
+app.onReady((device) => {
+    const LED_PIN = 22
+    device.pinMode(LED_PIN, "OUTPUT")
     while (1) {
-        api.digitalWrite(pin, "HIGH");
-        api.delay(1000);
+        device.print("Blinking!")
+        device.digitalWrite(LED_PIN, "HIGH")
+        device.delay(1000)
+        device.digitalWrite(LED_PIN, "LOW")
+        device.delay(1000)
+    }
+})
+`
+
+
+const APP_TS = `\
+/*
+import * as app from "makestack";
+import { Device } from "makestack";
+
+app.onReady((device: Device) => {
+    const LED_PIN = 22;
+    device.pinMode(LED_PIN, "OUTPUT");
+    while (1) {
+        device.print("Blinking!");
+        device.digitalWrite(LED_PIN, "HIGH");
+        device.delay(1000);
+        device.digitalWrite(LED_PIN, "LOW");
+        device.delay(1000);
     }
 });
+*/
+const foo: number = 3-1;
+`
+
+const TSCONFIG_JSON = `\
+{
+    "compilerOptions": {
+        "declaration": true,
+        "sourceMap": true,
+        "module": "commonjs",
+        "moduleResolution": "node",
+        "pretty": true,
+        "alwaysStrict": true,
+        "strict": true,
+        "target": "es2018"
+    },
+    "include": [
+        "./src/**/*"
+    ]
+}
 `
 
 const GITIGNORE = `\
+node_modules
 *.log
+app.js
 `
+
+const DEPENDENCIES: string[] = []
+const DEV_DEPENDENCIES: string[] = []
+const TYPESCRIPT_DEV_DEPENDENCIES: string[] = ["typescript"]
 
 function genFile(filepath: string, template: string, ctx: any) {
     logger.action("create", filepath);
@@ -45,7 +94,11 @@ function mkdir(filepath: string) {
     fs.mkdirSync(filepath);
 }
 
-function scaffold(appDir: string) {
+interface ScaffoldOptions {
+    typescript: boolean,
+}
+
+function scaffold(appDir: string, opts: ScaffoldOptions) {
     if (fs.existsSync(appDir)) {
         throw new Error(`The directory alredy exists: \`${appDir}'`);
     }
@@ -54,13 +107,23 @@ function scaffold(appDir: string) {
     mkdir(appDir);
     const ctx = {
         name: path.basename(appDir),
+        typescript: opts.typescript,
     };
+
     genFile(path.join(appDir, "package.json"), PACKAGE_JSON, ctx);
-    genFile(path.join(appDir, "app.js"), APP_JS, ctx);
     genFile(path.join(appDir, ".gitignore"), GITIGNORE, ctx);
+    if (opts.typescript) {
+        genFile(path.join(appDir, "app.ts"), APP_TS, ctx);
+    } else {
+        genFile(path.join(appDir, "app.js"), APP_JS, ctx);
+    }
 
     logger.progress("Installing dependencies...");
-    exec(["yarn"], { cwd: appDir });
+    let deps = [...DEPENDENCIES, ...DEV_DEPENDENCIES];
+    if (opts.typescript) {
+        deps = deps.concat(TYPESCRIPT_DEV_DEPENDENCIES);
+    }
+    exec(["yarn", "add", ...deps], { cwd: appDir });
 
     logger.success(`Successfully generated ${appDir}`);
 }
@@ -74,9 +137,15 @@ export class NewCommand extends Command {
             desc: "The app directory.",
         }
     ];
-    public static opts = [];
+    public static opts = [
+        {
+            name: "--typescript",
+            desc: "Create a TypeScript app.",
+            default: false,
+        }
+    ];
 
-    public async run(args: Args, _opts: Opts) {
-        await scaffold(args.path);
+    public async run(args: Args, opts: Opts) {
+        await scaffold(args.path, opts as ScaffoldOptions);
     }
 }

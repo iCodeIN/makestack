@@ -1,7 +1,9 @@
+import * as fs from "fs-extra";
 import * as path from "path";
 import * as tmp from "tmp";
 import * as nunjucks from "nunjucks";
 import { spawnSync, SpawnSyncOptions } from "child_process";
+import { logger } from "./logger";
 
 export function resolveRepoPath(relpath: string): string {
     return path.join(__dirname, "..", relpath);
@@ -59,4 +61,13 @@ export function render(template: string, ctx: { [name: string]: string }) {
 
 export function createTmpDir(prefix: string): string {
     return tmp.dirSync({ prefix }).name;
+}
+
+export function execScriptHook(appDir: string, hook: string) {
+    const scripts = fs.readJSONSync(path.join(appDir, "package.json")).scripts;
+    if (scripts && scripts[hook]) {
+        logger.progress(`Running ${hook} hook`);
+        logger.command(scripts[hook]);
+        exec(["sh", "-c", scripts[hook]], { cwd: appDir });
+    }
 }
