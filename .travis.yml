@@ -13,17 +13,14 @@ jobs:
             - flex
             - bison
             - gperf
-            - python-serial
-            - python-cryptography
-            - python-future
-            - python-pyparsing
-            - python-pyelftools
     - os: osx
       osx_image: xcode11
       node_js: "10"
 
 install:
   - yarn
+  # FIXME: Install pip packages since they're not cached by Travis CI.
+  - pip install --user -r firmware/deps/esp32/esp-idf/requirements.txt
 
 script:
   - yarn build
