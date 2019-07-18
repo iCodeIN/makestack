@@ -18,6 +18,6 @@ app.onReady((device) => {
     while (1) {
         const value = device.analogRead(pin)
         device.publish("soil-moist", value)
-        device.delay(60000)
+        device.delay(900000)
     }
 })
