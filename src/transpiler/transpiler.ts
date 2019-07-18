@@ -137,6 +137,12 @@ export class Transpiler {
         return "while (" + this.visitExpr(stmt.test) + ")" + this.visitBlockOrExpr(stmt.body);
     }
 
+    private visitDoWhileStmt(stmt: t.DoWhileStatement): string {
+        const test = this.visitExpr(stmt.test);
+        const body = this.visitBlockOrExpr(stmt.body);
+        return `do ${body} while (${test});`;
+    }
+
     private visitForStmt(stmt: t.ForStatement): string {
         let init;
         if (t.isVariableDeclaration(stmt.init)) {
@@ -165,6 +171,8 @@ export class Transpiler {
             return this.visitIfStmt(stmt);
         } else if (t.isWhileStatement(stmt)) {
             return this.visitWhileStmt(stmt);
+        } else if (t.isDoWhileStatement(stmt)) {
+            return this.visitDoWhileStmt(stmt);
         } else if (t.isForStatement(stmt)) {
             return this.visitForStmt(stmt);
         } else if (t.isReturnStatement(stmt)) {
