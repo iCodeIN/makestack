@@ -94,6 +94,8 @@ static Value api_pin_mode(Context *ctx, int nargs, Value *args) {
     int mode;
     if (mode_name == "OUTPUT") {
         mode = VM_PORT_GPIO_OUTPUT;
+    } else if (mode_name == "INPUT") {
+        mode = VM_PORT_GPIO_INPUT;
     } else {
         return VM_CREATE_ERROR("Invalid mode");
     }
