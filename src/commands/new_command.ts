@@ -37,7 +37,6 @@ app.onReady((device) => {
 
 
 const APP_TS = `\
-/*
 import * as app from "makestack";
 import { Device } from "makestack";
 
@@ -52,8 +51,6 @@ app.onReady((device: Device) => {
         device.delay(1000);
     }
 });
-*/
-const foo: number = 3-1;
 `
 
 const TSCONFIG_JSON = `\
@@ -158,6 +155,7 @@ function scaffold(appDir: string, opts: ScaffoldOptions) {
     genFile(path.join(appDir, ".gitignore"), GITIGNORE, ctx);
     if (opts.typescript) {
         genFile(path.join(appDir, "app.ts"), APP_TS, ctx);
+        genFile(path.join(appDir, "tsconfig.json"), TSCONFIG_JSON, ctx);
     } else {
         genFile(path.join(appDir, "app.js"), APP_JS, ctx);
     }
