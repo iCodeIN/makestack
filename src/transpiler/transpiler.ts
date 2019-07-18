@@ -219,10 +219,27 @@ export class Transpiler {
 
     private lambdaId: number = 0;
     private visitArrowFuncExpr(func: t.ArrowFunctionExpression): string {
+        if (func.generator) {
+            throw new TranspileError(func, "Generator is not supported.");
+        }
+
+        if (func.async) {
+            throw new TranspileError(func, "Async function is not supported.");
+        }
+
         const uniqueId = this.lambdaId;
         const lambdaName = `__lambda_${uniqueId}`;
         const closureName = `__closure_${uniqueId}`;
         this.lambdaId++;
+
+        const paramNames = [];
+        for (const param of func.params) {
+            if (t.isIdentifier(param)) {
+                paramNames.push(`"${param.name}"`);
+            } else {
+                throw new UnimplementedError(param);
+            }
+        }
 
         this.funcNameStack.push("(anonymous function)");
         let body;
@@ -233,7 +250,15 @@ export class Transpiler {
         }
         this.funcNameStack.pop();
 
-        this.lambda += `VM_FUNC_DEF(${lambdaName}, ${closureName})\n${body}\nVM_FUNC_DEF_END\n\n`;
+        let nargs = paramNames.length;
+        if (nargs > 6) {
+            throw new TranspileError(func, "Too many parameters.");
+        }
+
+        const enterMacro = `VM_FUNC_ENTER${nargs}(${closureName}, ${paramNames.join(", ")})`;
+        body = body.replace(/^[ \t\n]*\{/, enterMacro);
+
+        this.lambda += `VM_FUNC_DEF(${lambdaName}, ${closureName}) {\n${body}\n\n`;
         return `VM_FUNC(${lambdaName}, ${closureName})`;
     }
 

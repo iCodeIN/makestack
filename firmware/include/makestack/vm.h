@@ -40,11 +40,6 @@ void vm_port_debug(const char *fmt, ...);
 #define VM_BOOL(value) Value::Bool(value)
 #define VM_INT(value) Value::Int(value)
 #define VM_FUNC(name, closure) ({ closure = __ctx->create_closure_scope(); Value::Function(name); })
-#define VM_FUNC_DEF(name, closure)                                           \
-        Scope *closure = nullptr;                                            \
-        static Value name(Context *__ctx, int __nargs, Value *__args) {      \
-            Closure __closure(__ctx, closure);
-#define VM_FUNC_DEF_END }
 #define VM_ANON_LOC(line) VM_APP_LOC("(anonymous function)", line)
 #define VM_APP_LOC(func, line) SourceLoc("app.js", func, line)
 #define VM_SET(id, value) __ctx->current->set(id, value)
@@ -57,6 +52,57 @@ void vm_port_debug(const char *fmt, ...);
             __ctx->call(loc, __callee, nargs, __tmp_args);       \
         })
 
+#define VM_FUNC_DEF(name, closure)                                               \
+        Scope *closure = nullptr;                                                \
+        static Value name(Context *__ctx, int __nargs, Value *__args)
+
+#define VM_FUNC_ENTER0(closure)                                                  \
+        Closure __closure(__ctx, closure);                                       \
+
+#define VM_FUNC_ENTER1(closure, param1)                                          \
+        VM_ASSERT(__nargs <= 1 && "too few arguments");                          \
+        Closure __closure(__ctx, closure);                                       \
+        VM_SET(param1, __args[0]);
+
+#define VM_FUNC_ENTER2(closure, param1, param2)                                  \
+        VM_ASSERT(__nargs <= 2 && "too few arguments");                          \
+        Closure __closure(__ctx, closure);                                       \
+        VM_SET(param1, __args[0]);                                               \
+        VM_SET(param2, __args[1]);
+
+#define VM_FUNC_ENTER3(closure, param1, param2, param3)                          \
+        VM_ASSERT(__nargs <= 3 && "too few arguments");                          \
+        Closure __closure(__ctx, closure);                                       \
+        VM_SET(param1, __args[0]);                                               \
+        VM_SET(param2, __args[1]);                                               \
+        VM_SET(param3, __args[2]);
+
+#define VM_FUNC_ENTER4(closure, param1, param2, param3, param4)                  \
+        VM_ASSERT(__nargs <= 4 && "too few arguments");                          \
+        Closure __closure(__ctx, closure);                                       \
+        VM_SET(param1, __args[0]);                                               \
+        VM_SET(param2, __args[1]);                                               \
+        VM_SET(param3, __args[2]);                                               \
+        VM_SET(param4, __args[3]);
+
+#define VM_FUNC_ENTER5(closure, param1, param2, param3, param4, param5)          \
+        VM_ASSERT(__nargs <= 5 && "too few arguments");                          \
+        Closure __closure(__ctx, closure);                                       \
+        VM_SET(param1, __args[0]);                                               \
+        VM_SET(param2, __args[1]);                                               \
+        VM_SET(param3, __args[2]);                                               \
+        VM_SET(param4, __args[3]);                                               \
+        VM_SET(param5, __args[4]);
+
+#define VM_FUNC_ENTER6(closure, param1, param2, param3, param4, param5, param6)  \
+        VM_ASSERT(__nargs <= 6 && "too few arguments");                          \
+        Closure __closure(__ctx, closure);                                       \
+        VM_SET(param1, __args[0]);                                               \
+        VM_SET(param2, __args[1]);                                               \
+        VM_SET(param3, __args[2]);                                               \
+        VM_SET(param4, __args[3]);                                               \
+        VM_SET(param5, __args[4]);                                               \
+        VM_SET(param6, __args[5]);
 
 enum class ValueType {
     Invalid = 0, /* We never use it. */
