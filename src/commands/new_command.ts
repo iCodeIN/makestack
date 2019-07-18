@@ -10,7 +10,8 @@ const PACKAGE_JSON = `\
     "private": true,
     "makestack": {
         "name": "{{ name }}",
-        "board": "esp32"
+        "board": "esp32",
+        "cloud": "firebase"
     },
     "scripts": {
         "build": "./node_modules/.bin/tsc --outFile app.js app.ts"
@@ -73,6 +74,48 @@ const TSCONFIG_JSON = `\
 }
 `
 
+const FIREBASE_JSON = `\
+{
+    "functions": {
+    },
+    "hosting": {
+        "public": "public",
+        "ignore": [
+            "firebase.json",
+            "**/.*",
+            "**/node_modules/**"
+        ]
+    }
+}
+`
+
+const INDEX_HTML = `\
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>{{ name }} - index.html</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+            color: #121212;
+        }
+    </style>
+</head>
+<body>
+    <div style="width: 500px; margin: 70px auto 0;">
+        <h1 style="text-align: center;">{{name }} - index.html</h1>
+        <hr>
+        <p>
+            The <code>makestack deploy</code> command will automatically uploads
+            files in this <code>public</code> directory to the platform, for instance,
+            <a href="https://firebase.google.com/docs/hosting">Firebase Hosting</a>.
+        </p>
+    </div>
+</body>
+</html>
+`
+
 const GITIGNORE = `\
 node_modules
 *.log
@@ -96,6 +139,7 @@ function mkdir(filepath: string) {
 
 interface ScaffoldOptions {
     typescript: boolean,
+    firebase: boolean,
 }
 
 function scaffold(appDir: string, opts: ScaffoldOptions) {
@@ -116,6 +160,12 @@ function scaffold(appDir: string, opts: ScaffoldOptions) {
         genFile(path.join(appDir, "app.ts"), APP_TS, ctx);
     } else {
         genFile(path.join(appDir, "app.js"), APP_JS, ctx);
+    }
+
+    if (opts.firebase) {
+        genFile(path.join(appDir, "firebase.json"), FIREBASE_JSON, ctx);
+        mkdir(path.join(appDir, "public"));
+        genFile(path.join(appDir, "public/index.html"), INDEX_HTML, ctx);
     }
 
     logger.progress("Installing dependencies...");
@@ -142,7 +192,12 @@ export class NewCommand extends Command {
             name: "--typescript",
             desc: "Create a TypeScript app.",
             default: false,
-        }
+        },
+        {
+            name: "--firebase",
+            desc: "Generate Firebase files.",
+            default: false,
+        },
     ];
 
     public async run(args: Args, opts: Opts) {
