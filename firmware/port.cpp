@@ -87,6 +87,18 @@ static Value api_delay(Context *ctx, int nargs, Value *args) {
     return Value::Undefined();
 }
 
+static Value api_delay_seconds(Context *ctx, int nargs, Value *args) {
+    int secs = VM_GET_INT_ARG(0);
+    vTaskDelay((secs * 1000) / portTICK_PERIOD_MS);
+    return Value::Undefined();
+}
+
+static Value api_delay_minutes(Context *ctx, int nargs, Value *args) {
+    int mins = VM_GET_INT_ARG(0);
+    vTaskDelay((mins * 1000 * 60) / portTICK_PERIOD_MS);
+    return Value::Undefined();
+}
+
 static Value api_pin_mode(Context *ctx, int nargs, Value *args) {
     int pin = VM_GET_INT_ARG(0);
     std::string mode_name = VM_GET_STRING_ARG(1);
@@ -149,6 +161,8 @@ void run_app() {
     device_object.set(Value::String("print"), Value::Function(api_print));
     device_object.set(Value::String("publish"), Value::Function(api_publish));
     device_object.set(Value::String("delay"), Value::Function(api_delay));
+    device_object.set(Value::String("delaySeconds"), Value::Function(api_delay_seconds));
+    device_object.set(Value::String("delayMinutes"), Value::Function(api_delay_minutes));
     device_object.set(Value::String("pinMode"), Value::Function(api_pin_mode));
     device_object.set(Value::String("digitalWrite"), Value::Function(api_digital_write));
     device_object.set(Value::String("digitalRead"), Value::Function(api_digital_read));
