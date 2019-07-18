@@ -113,6 +113,13 @@ static Value api_digital_write(Context *ctx, int nargs, Value *args) {
     return Value::Undefined();
 }
 
+static Value api_digital_read(Context *ctx, int nargs, Value *args) {
+    int pin = VM_GET_INT_ARG(0);
+    bool value = digitalRead(pin) == VM_PORT_HIGH;
+    VM_DEBUG("digitalRead: %d %d", pin, value);
+    return Value::Bool(value);
+}
+
 static Value api_analog_read(Context *ctx, int nargs, Value *args) {
     int pin = VM_GET_INT_ARG(0);
 
@@ -144,6 +151,7 @@ void run_app() {
     device_object.set(Value::String("delay"), Value::Function(api_delay));
     device_object.set(Value::String("pinMode"), Value::Function(api_pin_mode));
     device_object.set(Value::String("digitalWrite"), Value::Function(api_digital_write));
+    device_object.set(Value::String("digitalRead"), Value::Function(api_digital_read));
     device_object.set(Value::String("analogRead"), Value::Function(api_analog_read));
 
     INFO("Initializing the app...");
