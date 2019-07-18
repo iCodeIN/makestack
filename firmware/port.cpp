@@ -107,18 +107,9 @@ static Value api_pin_mode(Context *ctx, int nargs, Value *args) {
 
 static Value api_digital_write(Context *ctx, int nargs, Value *args) {
     int pin = VM_GET_INT_ARG(0);
-    std::string level_name = VM_GET_STRING_ARG(1);
-    int level;
-    if (level_name == "HIGH") {
-        level = HIGH;
-    } else if (level_name == "LOW") {
-        level = LOW;
-    } else {
-        return VM_CREATE_ERROR("Invalid level name");
-    }
-
+    bool level = VM_GET_BOOL_ARG(1);
     VM_DEBUG("digitalWrite: %d %d", pin, level);
-    digitalWrite(pin, level);
+    digitalWrite(pin, level ? VM_PORT_HIGH : VM_PORT_LOW);
     return Value::Undefined();
 }
 

@@ -16,6 +16,7 @@ void vm_port_debug(const char *fmt, ...);
 
 #include "port.h"
 
+#define VM_GET_BOOL_ARG(nth) vm_get_bool_arg_or_panic(ctx, nargs, args, nth)
 #define VM_GET_INT_ARG(nth) vm_get_int_arg_or_panic(ctx, nargs, args, nth)
 #define VM_GET_STRING_ARG(nth) vm_get_string_arg_or_panic(ctx, nargs, args, nth)
 #define VM_GET_ARG(nth) vm_get_arg_or_panic(ctx, nargs, args, nth)
@@ -222,7 +223,6 @@ public:
         }
     }
 
-
     ValueInner *add(const ValueInner& rhs);
     ValueInner *sub(const ValueInner& rhs);
     ValueInner *mul(const ValueInner& rhs);
@@ -319,6 +319,10 @@ public:
 
     std::string toString() const {
         return inner->toString();
+    }
+
+    bool toBool() const {
+        return inner->toBool();
     }
 
     int toInt() const {
@@ -487,6 +491,7 @@ public:
 void vm_print_error(ErrorInfo &info);
 void vm_print_stacktrace(std::vector<Frame>& frames);
 void vm_check_nargs_or_panic(Context *ctx, int nargs, int nth);
+bool vm_get_bool_arg_or_panic(Context *ctx, int nargs, Value *args, int nth);
 int vm_get_int_arg_or_panic(Context *ctx, int nargs, Value *args, int nth);
 std::string vm_get_string_arg_or_panic(Context *ctx, int nargs, Value *args, int nth);
 Value vm_get_arg_or_panic(Context *ctx, int nargs, Value *args, int nth);

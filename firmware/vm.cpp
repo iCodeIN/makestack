@@ -20,6 +20,11 @@ static void check_nargs_or_panic(int nargs, int nth) {
     }
 }
 
+bool vm_get_bool_arg_or_panic(Context *ctx, int nargs, Value *args, int nth) {
+    check_nargs_or_panic(nargs, nth);
+    return args[nth].toBool();
+}
+
 int vm_get_int_arg_or_panic(Context *ctx, int nargs, Value *args, int nth) {
     check_nargs_or_panic(nargs, nth);
     return args[nth].toInt();
