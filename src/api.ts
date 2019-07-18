@@ -36,8 +36,12 @@ export interface DeviceAPI {
     print: (msg: string) => void;
     publish: (eventName: string, value: boolean | number | string) => void;
     delay: (milliseconds: number) => void;
+    delaySeconds: (seconds: number) => void;
+    delayMinutes: (minutes: number) => void;
     pinMode: (pin: number, mode: "OUTPUT" /* TODO: add more modes */) => void;
-    digitalWrite: (pin: number, level: "HIGH" | "LOW") => void;
+    digitalWrite: (pin: number, level: boolean) => void;
+    digitalRead: (pin: number, level: boolean) => boolean;
+    analogRead: (pin: number) => number;
 }
 
 //
