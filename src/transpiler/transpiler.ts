@@ -255,7 +255,8 @@ export class Transpiler {
             throw new TranspileError(func, "Too many parameters.");
         }
 
-        const enterMacro = `VM_FUNC_ENTER${nargs}(${closureName}, ${paramNames.join(", ")})`;
+        const macroArgs = [closureName, ...paramNames];
+        const enterMacro = `VM_FUNC_ENTER${nargs}(${macroArgs.join(", ")});`;
         body = body.replace(/^[ \t\n]*\{/, enterMacro);
 
         this.lambda += `VM_FUNC_DEF(${lambdaName}, ${closureName}) {\n${body}\n\n`;
