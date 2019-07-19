@@ -162,6 +162,12 @@ void send_and_receive_payload(String &url) {
 void wifi_adapter_task() {
     String url = __cred.server_url;
     url += "/makestack/protocol";
+
+    send_and_receive_payload(url);
+    // Send a heartbeat again in 5 seconds to send the app's startup
+    // (or unfortunately error) messages.
+    vTaskDelay((5 * 1000) / portTICK_PERIOD_MS);
+
     while (1) {
         send_and_receive_payload(url);
         vTaskDelay((MAKESTACK_HEARTBEAT_INTERVAL * 1000) / portTICK_PERIOD_MS);
