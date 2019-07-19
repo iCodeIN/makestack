@@ -45,6 +45,13 @@ app.onReady((device) => {
 - **Remote deivce firmware update.**
 - **Remote device log collection.**
 
+## Documentation
+- [Getting Started](getting-started)
+- [API Reference](api)
+- [Programming Guide](programming-guide)
+- [Device-side JavaScript](device-side-javascript)
+- [Security](security)
+
 ## Examples
 - [Example apps in the repository](https://github.com/seiyanuta/makestack/tree/master/examples).
 
