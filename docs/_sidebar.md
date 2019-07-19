@@ -1,4 +1,3 @@
-- [Home](/)
 - [Getting Started](/getting-started "Getting Started")
 - [API Reference](/api "API Reference")
 - [Programming Guide](/programming-guide "Programming Guide")
