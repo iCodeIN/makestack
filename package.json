@@ -1,7 +1,7 @@
 {
     "name": "makestack",
     "description": "A minimalistic IoT framework for super-rapid prototyping.",
-    "version": "0.0.0",
+    "version": "2.0.0",
     "main": "dist/index.js",
     "author": "Seiya Nuta <nuta@seiya.me>",
     "homepage": "https://makestack.org",
@@ -21,6 +21,7 @@
     },
     "files": [
         "makestack",
+        "firmware",
         "dist",
         "src"
     ],
