@@ -32,11 +32,11 @@ The runtime library of the generated C++ program behaves differently from full-f
 
 ## Major missing features
 - No global variables.
-    - You have to define constants like `LED_PIN` in the callback of `device.onReady`, not global scope.
-    - We will implement this at some point.
+    - You have to define constants like `LED_PIN` in the callback of `device.onReady`, not in the global scope.
 - No object literals.
 - No classes.
 - No standard libraries such as RegExp and JSON.
+- Block scope is not yet supported.
 
 ## Supported features
 ### Supported types
