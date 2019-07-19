@@ -119,7 +119,7 @@ node_modules
 app.js
 `
 
-const DEPENDENCIES: string[] = []
+const DEPENDENCIES: string[] = ["makestack"]
 const DEV_DEPENDENCIES: string[] = []
 const TYPESCRIPT_DEV_DEPENDENCIES: string[] = ["typescript"]
 
