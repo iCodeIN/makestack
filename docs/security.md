@@ -18,8 +18,8 @@ TODO: Add the supported ciphersuites list.
     - **Don't embed sensitive data on the device!** It can be easily extracted from the device if an attacker has physical access!
 - No application-level payload encryption
     - Payload (the firmware image, device log, etc.) is not encrypted.
-    - Of course you can utilize transport-layer level secure communication protocols such as HTTPS, but be careful when you use serial ports or HTTP (`makestack dev`) for development in a *public* Wi-Fi!
-- No firmware rollback
+    - Of course you can utilize transport-layer level secure communication protocols such as HTTPS, but be careful when you use serial ports or HTTP in a *public* Wi-Fi for development (`makestack dev`) !
+- No firmware rollback (it's a *reliability* problem btw)
     - I'm looking forward to your Pull Request :)
 - No secure boot
     - The firmware is easily modified if an attacker has physical access to the device.

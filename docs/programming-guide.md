@@ -46,6 +46,20 @@ app.onReady((device) => {
 
 :warning: Sending a value to the device from the server **is not yet implemented**.
 
+## The device API is not available in server contexts
+:x:
+```js
+app.onReady((device) => {
+    device.pinMode(11, "OUTPUT");
+    // The device and server does NOT share the global scope! This simply causes
+    // a undefined varible reference (`app`) error.
+    app.post("/turn_on", (value) => {
+        device.digitalWrite(11, true);
+    })
+})
+```
+
+
 ## `console.log` is not avialable in device cotexts
 :x:
 ```js
