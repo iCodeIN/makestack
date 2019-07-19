@@ -3,6 +3,8 @@
 
 > A minimalistic JavaScript IoT framework for rapid prototyping.
 
+## What is MakeStack?
+
 MakeStack is a server-side/device-side software framework focused on developer experience for rapid connected device protoyping. It offers out-of-the-box features that frees you from troublesome settings and allows you write less code.
 
 ## Warning
