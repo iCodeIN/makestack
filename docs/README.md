@@ -5,7 +5,7 @@
 
 MakeStack is a connected devices software framework focused on developer experience. It offers out-of-the-box features that frees you from troublesome settings and allows you write less code.
 
-# Warning
+## Warning
 **MakeStack is in the very early stage. There's a lot of unimplemented language features, APIs, and issues. Help me improve this by filing bugs and submitting Pull requests!**
 
 ```js

@@ -46,7 +46,7 @@ app.onReady((device) => {
 
 :warning: Sending a value to the device from the server **is not yet implemented**.
 
-## `console.log` is not avialable in the device callback
+## `console.log` is not avialable in device cotexts
 :x:
 ```js
 app.onReady((device) => {

@@ -1,6 +1,8 @@
 # Security
 
-![a funny xkcd comic about the security](https://imgs.xkcd.com/comics/security.png)
+> ![a funny xkcd comic about the security](https://imgs.xkcd.com/comics/security.png)
+>
+> [xkcd: Security](https://xkcd.com/538/)
 
 ## What MakeStack provides
 - HTTPS
