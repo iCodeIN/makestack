@@ -18,10 +18,9 @@ export function post(name: string, callback: HTTPCallback) {
     (global as any).__httpEndpoints["post"].push({ name, callback });
 }
 
-function delete_(name: string, callback: HTTPCallback) {
+export function delete_(name: string, callback: HTTPCallback) {
     (global as any).__httpEndpoints["delete"].push({ name, callback });
 }
-module.exports.delete = delete_;
 
 export function put(name: string, callback: HTTPCallback) {
     (global as any).__httpEndpoints["put"].push({ name, callback });

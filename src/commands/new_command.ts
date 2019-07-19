@@ -14,7 +14,9 @@ const PACKAGE_JSON = `\
         "cloud": "firebase"
     },
     "scripts": {
-        "build": "./node_modules/.bin/tsc --outFile app.js app.ts"
+{% if typescript %}
+        "build": "./node_modules/.bin/tsc app.ts"
+{% endif %}
     }
 }
 `
@@ -38,9 +40,9 @@ app.onReady((device) => {
 
 const APP_TS = `\
 import * as app from "makestack";
-import { Device } from "makestack";
+import { DeviceAPI } from "makestack";
 
-app.onReady((device: Device) => {
+app.onReady((device: DeviceAPI) => {
     const LED_PIN = 22;
     device.pinMode(LED_PIN, "OUTPUT");
     while (1) {
