@@ -3,42 +3,37 @@
 
 > A minimalistic JavaScript IoT framework for rapid prototyping.
 
-MakeStack is a connected devices software framework focused on developer experience. It offers out-of-the-box features that frees you from troublesome settings and allows you write less code.
+MakeStack is a server-side/device-side software framework focused on developer experience for rapid connected device protoyping. It offers out-of-the-box features that frees you from troublesome settings and allows you write less code.
 
 ## Warning
 **MakeStack is in the very early stage. There's a lot of unimplemented language features, APIs, and issues. Help me improve this by filing bugs and submitting Pull requests!**
 
 ```js
-/* Blinking LED. */
 const app = require("makestack")
 const SlackWebClient = require("@slack/web-api").WebClient
 
-/* Server-side */
-app.get("/test", (req, res) => {
-    res.send("Hello form /test")
-})
-
-app.onEvent("blinking", async (value) => {
+app.onEvent("my-sensor-data", async (value) => {
+    /* Server-side: post received sensor data on Slack. */
     const slack = new SlackWebClient("XXXXXXXXXXXXXXX")
-    await slack.chat.postMessage({ channel: "dev_null", text: "Blinking!" })
+    cosnt channelId = "C123456"
+    await slack.chat.postMessage({
+        channel: channelId,
+        text: `sensor data: ${value}`,
+    })
 })
 
-/* Device-side */
 app.onReady((device) => {
-    const LED_PIN = 22
-    device.pinMode(LED_PIN, "OUTPUT")
+    /* Device-side: send sensor data every 15 minutes. */
     while (1) {
-        device.publish("blinking")
-        device.digitalWrite(LED_PIN, true)
-        device.delay(1000)
-        device.digitalWrite(LED_PIN, false)
-        device.delay(1000)
+        const value = device.analogRead(pin)
+        device.publish("my-sensor-data", value)
+        device.delayMinutes(15)
     }
 })
 ```
 
 ## Features
-- **Single-file server-side/device-side programming in modern JavaScript** powered by the [JavaScript to C++ transpiler](transpiler).
+- **Single-file server-side/device-side programming in modern JavaScript** powered by the [JavaScript to C++ transpiler](device-side-javascript.md).
 - **Simplified development workflow:** just remember `flash`, `dev`, and `deploy` command.
 - **No user registration required:** deploy everything to your Firebase with just one command.
 - **Intuitive JavaScript API.**
@@ -46,11 +41,11 @@ app.onReady((device) => {
 - **Remote device log collection.**
 
 ## Documentation
-- [Getting Started](getting-started)
-- [API Reference](api)
-- [Programming Guide](programming-guide)
-- [Device-side JavaScript](device-side-javascript)
-- [Security](security)
+- [Getting Started](getting-started.md)
+- [API Reference](api.md)
+- [Programming Guide](programming-guide.md)
+- [Device-side JavaScript](device-side-javascript.md)
+- [Security](security.md)
 
 ## Examples
 - [Example apps in the repository](https://github.com/seiyanuta/makestack/tree/master/examples).
