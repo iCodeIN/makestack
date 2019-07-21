@@ -1,4 +1,5 @@
-// The entry point of the app (server side) invoked by the dev server.
+// The entry point of the app (server side) invoked by the dev server. The
+// current directory is the app directory.
 import * as path from "path";
 import * as express from "express";
 import * as proxy from "http-proxy-middleware";
@@ -37,6 +38,9 @@ function main() {
         target: `http://localhost:${devServerPort}`,
         changeOrigin: true
     }));
+
+    // Serve static files in the public.
+    server.use(express.static("public"));
 
     const appJsPath = path.resolve(process.cwd(), "app.js");
     initServer(appJsPath, server);
