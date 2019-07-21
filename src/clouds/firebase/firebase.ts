@@ -4,36 +4,6 @@ import { DeployOptions } from "..";
 import { exec, createTmpDir } from "../../helpers";
 import { logger } from "../../logger";
 
-function copyFile(dst: string, src: string) {
-    logger.action("copy", dst);
-    fs.copyFileSync(src, dst);
-}
-
-function copyDir(dst: string, src: string) {
-    logger.action("copy", dst);
-    fs.copySync(src, dst);
-}
-
-function copyFileIfExists(dst: string, src: string) {
-    if (fs.existsSync(src)) {
-        copyFile(dst, src);
-    }
-}
-
-function mkdir(dir: string) {
-    logger.action("mkdir", dir);
-    fs.mkdirpSync(dir);
-}
-
-function genFile(filepath: string, body: string) {
-    logger.action("create", filepath);
-    fs.writeFileSync(filepath, body);
-}
-
-function genJsonFile(filepath: string, json: any) {
-    genFile(filepath, JSON.stringify(json, null, 2));
-}
-
 const FUNCTIONS_PACKAGE_JSON = {
     private: true,
     name: "functions",
@@ -73,16 +43,20 @@ async function pack(appDir: string, firmwarePath: string, opts: DeployOptions): 
     const appFilePath = (relpath: string) =>  path.join(appDir, relpath);
     const buildFilePath = (relpath: string) =>  path.join(buildDir, relpath);
 
-    copyFile(buildFilePath("firebase.json"), appFilePath("firebase.json"));
+    fs.copySync(buildFilePath("firebase.json"), appFilePath("firebase.json"));
     for (const filename of EXTRA_FIREBASE_FILES) {
-        copyFileIfExists(buildFilePath(filename), appFilePath(filename));
+        const src = buildFilePath(filename);
+        const dst = appFilePath(filename)
+        if (fs.existsSync(src)) {
+            fs.copySync(dst, src);
+        }
     }
 
-    mkdir(buildFilePath("public"));
+    fs.mkdirpSync(buildFilePath("public"));
     if (fs.existsSync(appFilePath("public"))) {
         for (const basename of fs.readdirSync(appFilePath("public"))) {
             const dst = buildFilePath(path.join("public", basename));
-            copyFile(dst, appFilePath(path.join("public", basename)));
+            fs.copySync(dst, appFilePath(path.join("public", basename)));
         }
     }
 
@@ -94,19 +68,19 @@ async function pack(appDir: string, firmwarePath: string, opts: DeployOptions): 
         makestackDpendencies, packageJson.dependencies, appDependencies);
 
     const indexJs = fs.readFileSync(path.join(__dirname, "start.js"), "utf-8");
-    mkdir(buildFilePath("functions"));
-    genJsonFile(buildFilePath("functions/package.json"), packageJson);
-    genFile(buildFilePath("functions/index.js"), indexJs);
-    copyFile(buildFilePath("functions/app.js"), appFilePath("app.js"));
-    copyFile(buildFilePath("functions/firmware.bin"), firmwarePath);
-    mkdir(buildFilePath("functions/makestack"));
-    copyDir(buildFilePath("functions/makestack/dist"), path.resolve(__dirname, "../../../dist"));
-    copyFile(buildFilePath("functions/makestack/package.json"), path.resolve(__dirname, "../../../package.json"));
-    genJsonFile(buildFilePath(".firebaserc"), {
+    fs.mkdirpSync(buildFilePath("functions"));
+    fs.writeJsonSync(buildFilePath("functions/package.json"), packageJson, { spaces: 2 });
+    fs.writeFileSync(buildFilePath("functions/index.js"), indexJs);
+    fs.copySync(buildFilePath("functions/app.js"), appFilePath("app.js"));
+    fs.copySync(buildFilePath("functions/firmware.bin"), firmwarePath);
+    fs.mkdirpSync(buildFilePath("functions/makestack"));
+    fs.copySync(buildFilePath("functions/makestack/dist"), path.resolve(__dirname, "../../../dist"));
+    fs.copySync(buildFilePath("functions/makestack/package.json"), path.resolve(__dirname, "../../../package.json"));
+    fs.writeJsonSync(buildFilePath(".firebaserc"), {
         projects: {
             default: opts.firebaseProject
         },
-    });
+    }, { spaces: 2 });
 
     exec(["yarn", "install"], { cwd: buildFilePath("functions") });
     return buildDir;
