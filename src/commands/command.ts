@@ -116,7 +116,7 @@ export const APP_OPTS = [
 export const ADAPTER_OPTS = [
     {
         name: "--adapter <adapter>",
-        desc: "The adapter type ('serial' or 'http').",
+        desc: "The adapter type ('serial' or 'wifi').",
         default: "serial",
     },
 ]

@@ -14,7 +14,7 @@ import {
 import { Board, BuildError, BuildOptions } from "../boards";
 import { logger } from "../logger";
 import { buildApp } from "../firmware";
-import { SerialAdapter, HTTPAdapter } from "../adapters";
+import { SerialAdapter, WiFiAdapter } from "../adapters";
 import { DevServer } from "../dev_server";
 import { ProtocolServer } from "../server/server";
 
@@ -65,7 +65,7 @@ export class DevCommand extends Command {
 
         const httpServerPort = opts.port + 1;
         const httpServer = express();
-        new HTTPAdapter(httpServer, payload => {
+        new WiFiAdapter(httpServer, payload => {
             let reply = this.protocolServer.processPayload(payload);
             return reply ? reply : this.protocolServer.buildHeartbeatPayload();
         });
@@ -148,7 +148,7 @@ export class DevCommand extends Command {
                     }
                 }, 5000);
                 break;
-            case "http":
+            case "wifi":
                 /* Already running. */
                 break;
             default:
