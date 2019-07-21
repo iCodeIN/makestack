@@ -5,6 +5,7 @@ import {
     CLOUD_OPTS,
     BOARD_OPTS,
     APP_OPTS,
+    BUILD_OPTS,
 } from "./command";
 import { buildApp } from "../firmware";
 import { logger } from "../logger";
@@ -17,6 +18,7 @@ export class DeployCommand extends Command {
     public static args = [];
     public static opts = [
         ...APP_OPTS,
+        ...BUILD_OPTS,
         ...BOARD_OPTS,
         ...CLOUD_OPTS
     ];
