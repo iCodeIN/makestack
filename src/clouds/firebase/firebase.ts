@@ -1,7 +1,7 @@
 import * as fs from "fs-extra";
 import * as path from "path";
 import { DeployOptions } from "..";
-import { exec, createTmpDir } from "../../helpers";
+import { exec, createTmpDir, UserError } from "../../helpers";
 import { logger } from "../../logger";
 
 const FUNCTIONS_PACKAGE_JSON = {
@@ -23,11 +23,11 @@ const EXTRA_FIREBASE_FILES = [
 
 export async function deploy(appDir: string, firmwarePath: string, opts: DeployOptions) {
     if (!opts.firebaseProject) {
-        throw new Error("--firebase-project is not set.");
+        throw new UserError("--firebase-project is not set.");
     }
 
     if (!fs.existsSync(path.join(appDir, "firebase.json"))) {
-        throw new Error(`Missing firebase.json in ${appDir}. See: https://firebase.google.com/docs/cli/#the_firebasejson_file`);
+        throw new UserError(`Missing firebase.json in ${appDir}. See: https://firebase.google.com/docs/cli/#the_firebasejson_file`);
     }
 
     logger.progress("Packing the app...")

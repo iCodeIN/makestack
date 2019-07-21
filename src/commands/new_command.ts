@@ -3,7 +3,7 @@ import * as path from "path";
 import * as nunjucks from "nunjucks";
 import { Args, Command, Opts } from "./command";
 import { logger } from "../logger";
-import { exec } from "../helpers";
+import { exec, UserError } from "../helpers";
 
 const PACKAGE_JSON = `\
 {
@@ -143,7 +143,7 @@ interface ScaffoldOptions {
 
 function scaffold(appDir: string, opts: ScaffoldOptions) {
     if (fs.existsSync(appDir)) {
-        throw new Error(`The directory alredy exists: \`${appDir}'`);
+        throw new UserError(`The directory alredy exists: \`${appDir}'`);
     }
 
     logger.progress("Generating files");

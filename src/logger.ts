@@ -62,7 +62,9 @@ export class Logger {
     }
 
     public error(...messages: any[]) {
-        this.log(red.bold("Error: " + join(messages)), true);
+        const msg = join(messages);
+        const prefix = (msg.startsWith("Error:")) ? "" : "Error: ";
+        this.log(red.bold(prefix + msg), true);
         process.exit(1);
     }
 

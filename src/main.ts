@@ -4,6 +4,7 @@ import * as path from "path";
 import { commands } from "./commands";
 import { logger } from "./logger";
 import { WATCH_OPTS, OptDefinition } from "./commands/command";
+import { UserError } from "./helpers";
 const { version } = require(path.resolve(__dirname, "../package.json"));
 
 caporal.description("A minimalistic IoT framework for super-rapid prototyping.");
@@ -42,7 +43,11 @@ for (const klass of commands) {
                 });
             }
         } catch (e) {
-            logger.error(e.stack);
+            if (e instanceof UserError) {
+                logger.error(e.message);
+            } else {
+                logger.error(e.stack);
+            }
             process.exit(1);
         }
     });

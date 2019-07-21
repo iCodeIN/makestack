@@ -17,6 +17,7 @@ import { buildApp } from "../firmware";
 import { SerialAdapter, WiFiAdapter } from "../adapters";
 import { DevServer } from "../dev_server";
 import { ProtocolServer } from "../server/server";
+import { UserError } from "../helpers";
 
 export class DevCommand extends Command {
     public static command = "dev";
@@ -152,7 +153,7 @@ export class DevCommand extends Command {
                 /* Already running. */
                 break;
             default:
-                throw new Error(`Unknown adapter type: \`${adapter}'`);
+                throw new UserError(`Unknown adapter type: \`${adapter}'`);
         }
     }
 }

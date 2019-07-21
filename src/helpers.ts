@@ -5,6 +5,8 @@ import * as nunjucks from "nunjucks";
 import { spawnSync, SpawnSyncOptions } from "child_process";
 import { logger } from "./logger";
 
+export class UserError extends Error {}
+
 export function resolveRepoPath(relpath: string): string {
     return path.join(__dirname, "..", relpath);
 }

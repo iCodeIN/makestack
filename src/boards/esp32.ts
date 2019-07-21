@@ -1,7 +1,7 @@
 import { spawn, spawnSync } from "child_process";
 import * as os from "os";
 import * as path from "path";
-import { resolveRepoPath, exec, createTmpDir } from "../helpers";
+import { resolveRepoPath, exec, createTmpDir, UserError } from "../helpers";
 import * as fs from "fs-extra";
 import { BuildError, BuildOptions } from ".";
 import { logger } from "../logger";
@@ -88,7 +88,7 @@ async function installDependencies(firmwareDir: string) {
             osName = "osx";
             break;
         default:
-            throw new Error("Unsupported os type");
+            throw new UserError("Unsupported os type");
     }
     const toolchainBaseName = `xtensa-esp32-elf-${osName}-${TOOLCHAIN_VERSION}.tar.gz`;
     const toolchainUrl = `https://dl.espressif.com/dl/${toolchainBaseName}`;

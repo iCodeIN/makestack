@@ -1,5 +1,6 @@
 import * as fs from "fs";
 import * as path from "path";
+import { UserError } from "../helpers";
 
 export type Validator =
     | RegExp
@@ -39,23 +40,23 @@ export abstract class Command {
 
 export const validateAppDir: Validator = (appDir: string): any => {
     if (!fs.existsSync(appDir)) {
-        throw new Error("The app directory does not exist");
+        throw new UserError("The app directory does not exist");
     }
 
     appDir = path.resolve(appDir);
     if (!fs.statSync(appDir).isDirectory()) {
-        throw new Error(`${appDir} is not a directory`);
+        throw new UserError(`${appDir} is not a directory`);
     }
 
     const packageJson = path.join(appDir, "package.json");
     if (!fs.existsSync(packageJson)) {
-        throw new Error(`${packageJson} does not exist`);
+        throw new UserError(`${packageJson} does not exist`);
     }
 
     const appJs = path.join(appDir, "app.js");
     const appTs = path.join(appDir, "app.ts");
     if (!fs.existsSync(appJs) && !fs.existsSync(appTs)) {
-        throw new Error(`Neither ${appJs} nor ${appTs} does not exist.`);
+        throw new UserError(`Neither ${appJs} nor ${appTs} does not exist.`);
     }
 
     return appDir;
@@ -64,7 +65,7 @@ export const validateAppDir: Validator = (appDir: string): any => {
 const availableBoardTypes = ["esp32"];
 export const validateBoardType: Validator = (boardType: string): any => {
     if (!availableBoardTypes.includes(boardType)) {
-        throw new Error("Invalid board type.");
+        throw new UserError("Invalid board type.");
     }
 
     return require(`../boards/${boardType}`);
@@ -73,7 +74,7 @@ export const validateBoardType: Validator = (boardType: string): any => {
 const availableCloudTypes = ["firebase"];
 export const validateCloudType: Validator = (cloudType: string): any => {
     if (!availableCloudTypes.includes(cloudType)) {
-        throw new Error("Invalid cloud type.");
+        throw new UserError("Invalid cloud type.");
     }
 
     return require(`../clouds/${cloudType}`);
@@ -94,11 +95,11 @@ export const validateDeviceFilePath: Validator = (deviceFile: string): any => {
     });
 
     if (candidates.length === 0) {
-        throw new Error("Failed to locate the device file.");
+        throw new UserError("Failed to locate the device file.");
     }
 
     if (candidates.length > 1) {
-        throw new Error("Found multiple device files. Please specify the one in the command-line option.");
+        throw new UserError("Found multiple device files. Please specify the one in the command-line option.");
     }
 
     return path.join("/dev", candidates[0]);
