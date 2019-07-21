@@ -56,6 +56,10 @@ export async function deploy(appDir: string, firmwarePath: string, opts: DeployO
         throw new Error("--firebase-project is not set.");
     }
 
+    if (!fs.existsSync(path.join(appDir, "firebase.json"))) {
+        throw new Error(`Missing firebase.json in ${appDir}. See: https://firebase.google.com/docs/cli/#the_firebasejson_file`);
+    }
+
     logger.progress("Packing the app...")
     const buildDir = await pack(appDir, firmwarePath, opts);
 
