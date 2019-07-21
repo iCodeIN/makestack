@@ -352,14 +352,21 @@ export class Transpiler {
 
     private visitBinaryExpr(expr: t.BinaryExpression): string {
         const SUPPORTED_OPS: string[] = [
-            "+", "-", "*", "/", "==", "!=", "<", ">", "<=", ">=", "&", "|", "^", "<<", ">>", "%"
+            "+", "-", "*", "/", "==", "!=", "<", ">", "<=", ">=", "&", "|", "^", "<<", ">>", "%",
+            "===", "!=="
         ];
 
         if (!SUPPORTED_OPS.includes(expr.operator)) {
             throw new TranspileError(expr, `\`${expr.operator}' operator is not yet supported.`);
         }
 
-        return "(" + this.visitExpr(expr.left) + expr.operator + this.visitExpr(expr.right) + ")";
+        let op: string = expr.operator;
+        if (["===", "!=="].includes(op)) {
+            // Replace === and !=== with == and != respectively.
+            op = op[0] + "=";
+        }
+
+        return "(" + this.visitExpr(expr.left) + op + this.visitExpr(expr.right) + ")";
     }
 
     private visitAssignExpr(expr: t.AssignmentExpression): string {

@@ -66,7 +66,7 @@ test("if statement", () => {
 
             if (device.location == "earth") {
                 device.print("I'm on the earth!");
-            } else if (device.name == "moon")
+            } else if (device.name === "moon")
                 device.print("I'm on the moon!");
             else
                 device.print("Where am I?");
