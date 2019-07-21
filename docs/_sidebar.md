@@ -1,5 +1,5 @@
 - [Getting Started](/getting-started "Getting Started")
 - [API Reference](/api "API Reference")
-- [Programming Guide](/programming-guide "Programming Guide")
+- [Dos and Don'ts](/dos-and-donts "Dos and Don'ts")
 - [Device-side JavaScript](/device-side-javascript "Device-side JavaScript")
 - [Security](/security "Security")

@@ -45,7 +45,7 @@ app.onReady((device) => {
 ## Documentation
 - [Getting Started](getting-started.md)
 - [API Reference](api.md)
-- [Programming Guide](programming-guide.md)
+- [Dos and Don'ts](do-and-donts.md)
 - [Device-side JavaScript](device-side-javascript.md)
 - [Security](security.md)
 
