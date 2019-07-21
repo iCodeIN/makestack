@@ -39,7 +39,7 @@ app.onReady((device) => {
 - **Simplified development workflow:** just remember `flash`, `dev`, and `deploy` command.
 - **No user registration required:** deploy everything to your Firebase with just one command.
 - **Intuitive JavaScript API.**
-- **Remote deivce firmware update.**
+- **Remote device firmware update.**
 - **Remote device log collection.**
 
 ## Documentation
