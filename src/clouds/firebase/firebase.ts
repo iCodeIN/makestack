@@ -43,12 +43,11 @@ async function pack(appDir: string, firmwarePath: string, opts: DeployOptions): 
     const appFilePath = (relpath: string) =>  path.join(appDir, relpath);
     const buildFilePath = (relpath: string) =>  path.join(buildDir, relpath);
 
-    fs.copySync(buildFilePath("firebase.json"), appFilePath("firebase.json"));
+    fs.copySync(appFilePath("firebase.json"), buildFilePath("firebase.json"));
     for (const filename of EXTRA_FIREBASE_FILES) {
         const src = buildFilePath(filename);
-        const dst = appFilePath(filename)
         if (fs.existsSync(src)) {
-            fs.copySync(dst, src);
+            fs.copySync(src, appFilePath(filename));
         }
     }
 
@@ -56,7 +55,7 @@ async function pack(appDir: string, firmwarePath: string, opts: DeployOptions): 
     if (fs.existsSync(appFilePath("public"))) {
         for (const basename of fs.readdirSync(appFilePath("public"))) {
             const dst = buildFilePath(path.join("public", basename));
-            fs.copySync(dst, appFilePath(path.join("public", basename)));
+            fs.copySync(appFilePath(path.join("public", basename)), dst);
         }
     }
 
@@ -71,11 +70,11 @@ async function pack(appDir: string, firmwarePath: string, opts: DeployOptions): 
     fs.mkdirpSync(buildFilePath("functions"));
     fs.writeJsonSync(buildFilePath("functions/package.json"), packageJson, { spaces: 2 });
     fs.writeFileSync(buildFilePath("functions/index.js"), indexJs);
-    fs.copySync(buildFilePath("functions/app.js"), appFilePath("app.js"));
-    fs.copySync(buildFilePath("functions/firmware.bin"), firmwarePath);
+    fs.copySync(appFilePath("app.js"), buildFilePath("functions/app.js"));
+    fs.copySync(firmwarePath, buildFilePath("functions/firmware.bin"));
     fs.mkdirpSync(buildFilePath("functions/makestack"));
-    fs.copySync(buildFilePath("functions/makestack/dist"), path.resolve(__dirname, "../../../dist"));
-    fs.copySync(buildFilePath("functions/makestack/package.json"), path.resolve(__dirname, "../../../package.json"));
+    fs.copySync(path.resolve(__dirname, "../../../dist"), buildFilePath("functions/makestack/dist"));
+    fs.copySync(path.resolve(__dirname, "../../../package.json"), buildFilePath("functions/makestack/package.json"));
     fs.writeJsonSync(buildFilePath(".firebaserc"), {
         projects: {
             default: opts.firebaseProject
