@@ -19,8 +19,6 @@ jobs:
 
 install:
   - yarn
-  # FIXME: Install pip packages since they're not cached by Travis CI.
-  - pip install --user -r firmware/deps/esp32/esp-idf/requirements.txt
 
 script:
   - yarn build
